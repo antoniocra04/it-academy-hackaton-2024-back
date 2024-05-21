@@ -1,3 +1,8 @@
+using InterestClubWebAPI.Context;
+using InterestClubWebAPI.Enums;
+using InterestClubWebAPI.Models;
+
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.

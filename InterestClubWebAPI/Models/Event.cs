@@ -13,7 +13,7 @@
 
         public DateTime EventDate { get; set; }
         
-        public List<User> Participants { get; set; }//Участники ивента
+        public virtual List<User> Participants { get; set; }//Участники ивента
 
 
 
