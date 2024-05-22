@@ -9,7 +9,6 @@ namespace InterestClubWebAPI.Controllers
 {
     public class UsersController : Controller
     {
-
         public IActionResult Index()
         {
             return View();
@@ -21,19 +20,17 @@ namespace InterestClubWebAPI.Controllers
             using (ApplicationContext db = new ApplicationContext())
             {
 
-                if (db.Users.Any(p => p.Login == login))
+                if (db.Users.Any(user => user.Login == login))
                 {
                     return BadRequest();
                 }
                 else
-                {
-                    //стоит дороботать логику сопостовления паролей и не занятость логина 
+                {                    
                     db.Users.Add(new User { Login = login, Password = password });
                     db.SaveChanges();
                     return Ok();
                 }
             }
-
         }
 
         [HttpPost("loginIn")]
@@ -42,7 +39,7 @@ namespace InterestClubWebAPI.Controllers
         {
             using (ApplicationContext db = new ApplicationContext())
             {
-                if (db.Users.Any(p => p.Login == login && p.Password == password))
+                if (db.Users.Any(user => user.Login == login && user.Password == password))
                 {
                     return Ok();
                 }
