@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "a+Uz7gqiYyQFnVjqRGj4ZnVcGXmTmvSHgl197QPCx/HhknQ/sATqjPjmwBBknuO8mFCmfu7ZelFIDnK5y+FZ0Q==",
+  "dgSpecHash": "K942PCjs21X4c488N5vEBV/MzLCY49Nq3oWXobowEKqsp/vYDeTGdK2IorTiQYjf7blePSGUzzstK0muR5jLqA==",
   "success": true,
-  "projectFilePath": "C:\\Users\\vgorr\\source\\repos\\it-academy-hackaton-2024-back\\InterestClubWebAPI\\InterestClubWebAPI.csproj",
+  "projectFilePath": "C:\\Users\\vgorr\\Source\\Repos\\it-academy-hackaton-2024-back\\InterestClubWebAPI\\InterestClubWebAPI.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\vgorr\\.nuget\\packages\\humanizer.core\\2.14.1\\humanizer.core.2.14.1.nupkg.sha512",
     "C:\\Users\\vgorr\\.nuget\\packages\\microsoft.bcl.asyncinterfaces\\6.0.0\\microsoft.bcl.asyncinterfaces.6.0.0.nupkg.sha512",

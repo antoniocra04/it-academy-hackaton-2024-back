@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\vgorr\\source\\repos\\it-academy-hackaton-2024-back\\InterestClubWebAPI\\InterestClubWebAPI.csproj": {}
+    "C:\\Users\\vgorr\\Source\\Repos\\it-academy-hackaton-2024-back\\InterestClubWebAPI\\InterestClubWebAPI.csproj": {}
   },
   "projects": {
-    "C:\\Users\\vgorr\\source\\repos\\it-academy-hackaton-2024-back\\InterestClubWebAPI\\InterestClubWebAPI.csproj": {
+    "C:\\Users\\vgorr\\Source\\Repos\\it-academy-hackaton-2024-back\\InterestClubWebAPI\\InterestClubWebAPI.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\vgorr\\source\\repos\\it-academy-hackaton-2024-back\\InterestClubWebAPI\\InterestClubWebAPI.csproj",
+        "projectUniqueName": "C:\\Users\\vgorr\\Source\\Repos\\it-academy-hackaton-2024-back\\InterestClubWebAPI\\InterestClubWebAPI.csproj",
         "projectName": "InterestClubWebAPI",
-        "projectPath": "C:\\Users\\vgorr\\source\\repos\\it-academy-hackaton-2024-back\\InterestClubWebAPI\\InterestClubWebAPI.csproj",
+        "projectPath": "C:\\Users\\vgorr\\Source\\Repos\\it-academy-hackaton-2024-back\\InterestClubWebAPI\\InterestClubWebAPI.csproj",
         "packagesPath": "C:\\Users\\vgorr\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\vgorr\\source\\repos\\it-academy-hackaton-2024-back\\InterestClubWebAPI\\obj\\",
+        "outputPath": "C:\\Users\\vgorr\\Source\\Repos\\it-academy-hackaton-2024-back\\InterestClubWebAPI\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\vgorr\\AppData\\Roaming\\NuGet\\NuGet.Config",
