@@ -15,7 +15,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("InterestClubWebAPI")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+1a25bbb84b94ffa1f7b2a169f8649ea820997051")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+c17fd08308936599a829def1cea379c883ab87d0")]
 [assembly: System.Reflection.AssemblyProductAttribute("InterestClubWebAPI")]
 [assembly: System.Reflection.AssemblyTitleAttribute("InterestClubWebAPI")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
