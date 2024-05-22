@@ -7,8 +7,9 @@ using System.Xml.Linq;
 
 namespace InterestClubWebAPI.Controllers
 {
-    public class UsersController : Controller    {
-            
+    public class UsersController : Controller
+    {
+
         public IActionResult Index()
         {
             return View();
@@ -18,8 +19,8 @@ namespace InterestClubWebAPI.Controllers
         public IActionResult SingUp(string login, string password)
         {
             using (ApplicationContext db = new ApplicationContext())
-            {               
-                
+            {
+
                 if (db.Users.Any(p => p.Login == login))
                 {
                     return BadRequest();
@@ -30,10 +31,26 @@ namespace InterestClubWebAPI.Controllers
                     db.Users.Add(new User { Login = login, Password = password });
                     db.SaveChanges();
                     return Ok();
-                }   
-            }  
-                
+                }
+            }
+
         }
 
+        [HttpPost("loginIn")]
+
+        public IActionResult LoginIn(string login, string password)
+        {
+            using (ApplicationContext db = new ApplicationContext())
+            {
+                if (db.Users.Any(p => p.Login == login && p.Password == password))
+                {
+                    return Ok();
+                }
+                else
+                {
+                    return BadRequest();
+                }
+            }
+        }
     }
 }
