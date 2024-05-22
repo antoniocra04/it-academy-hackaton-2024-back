@@ -1,4 +1,9 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using InterestClubWebAPI.Context;
+using InterestClubWebAPI.Models;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using System.Data.Entity;
+using System.Xml.Linq;
 
 namespace InterestClubWebAPI.Controllers
 {
@@ -7,6 +12,40 @@ namespace InterestClubWebAPI.Controllers
         public IActionResult Index()
         {
             return View();
+        }
+
+        [HttpPost("singUp")]
+        public IActionResult SingUp(string login, string password)
+        {
+            using (ApplicationContext db = new ApplicationContext())
+            {
+                if (db.Users.Any(user => user.Login == login))
+                {
+                    return BadRequest();
+                }
+                else
+                {                    
+                    db.Users.Add(new User { Login = login, Password = password });
+                    db.SaveChanges();
+                    return Ok();
+                }
+            }
+        }
+
+        [HttpPost("loginIn")]
+        public IActionResult LoginIn(string login, string password)
+        {
+            using (ApplicationContext db = new ApplicationContext())
+            {
+                if (db.Users.Any(user => user.Login == login && user.Password == password))
+                {
+                    return Ok();
+                }
+                else
+                {
+                    return BadRequest();
+                }
+            }
         }
     }
 }
