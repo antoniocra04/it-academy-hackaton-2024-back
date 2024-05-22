@@ -19,7 +19,6 @@ namespace InterestClubWebAPI.Controllers
         {
             using (ApplicationContext db = new ApplicationContext())
             {
-
                 if (db.Users.Any(user => user.Login == login))
                 {
                     return BadRequest();
@@ -34,7 +33,6 @@ namespace InterestClubWebAPI.Controllers
         }
 
         [HttpPost("loginIn")]
-
         public IActionResult LoginIn(string login, string password)
         {
             using (ApplicationContext db = new ApplicationContext())
