@@ -10,31 +10,31 @@ namespace InterestClubWebAPI.Controllers
     public class ClubController : Controller
     {
         [HttpPost("CreateClub")]
-        public IActionResult CreateClub(string title, string deskription)
+        public IActionResult CreateClub(string title, string description)
         {
             using (ApplicationContext db = new ApplicationContext())
-            {
-                if (db.Club.Any(Club => club.Titlte == title))
+            {                
+                if (db.Clubs.Any(Club => Club.Title == title))
                 {
                     return BadRequest();
                 }
                 else
                 {                    
-                    db.Club.Add(new Club { Title = title, Deksription = deskription });
+                    db.Clubs.Add(new Club { Title = title, Description = description });
                     db.SaveChanges();
                     return Ok();
                 }
             }
         }
 
-        [HttpPost("delClub")]
-        public IActionResult DelClub(string title)
+        [HttpPost("DeleteClub")]
+        public IActionResult DeleteClub(string title)
         {
             using (ApplicationContext db = new ApplicationContext())
             {
-                if (db.Club.Any(club => club.Title == title))
+                if (db.Clubs.Any(club => club.Title == title))
                 {
-                    db.Club.Remove(db.Club.Where(club => club.Title == title).FirstOrDefault());
+                    db.Clubs.Remove(db.Clubs.Where(club => club.Title == title).FirstOrDefault());
                     db.SaveChanges();
                     return Ok();
                 }
