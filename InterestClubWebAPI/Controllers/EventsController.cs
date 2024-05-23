@@ -4,27 +4,31 @@ namespace InterestClubWebAPI.Controllers
 {
     public class EventsController : Controller
     {
-        private readonly ApplicationContext dbContext;
-        IWebHostEnvironment _appEnvironment;
         public IActionResult Index()
         {
             return View();
-        }
-       
+        }       
         
         [HttpPost("AddEvent")]
-        public async Task<ActionResult> AddEvent(Event events)
+        public IActionResult AddEvent(string name, string description, string idUser)
         {
-            dbContext.Events.Add(events);
-            dbContext.SaveChanges();
-            return Ok(events);
+            using (ApplicationContext db = new ApplicationContext())
+            {                               
+                if (db.Events.Any(Event => Event.Name == name))
+                {
+                    return BadRequest();
+                }
+                else
+                {    
+                    DateTime eventDate = DateTime.Now;
+                    var guid = new Guid(idUser);
+                    User? user = db.Users.FirstOrDefault(u => u.Id == guid);
+                    List<User> part = new List <User> { user };
+                    db.Events.Add(new Event { Name = name, Description = description, EventDate = eventDate, Participants = part });
+                    db.SaveChanges();
+                    return Ok();
+                }
+            }
         }
-        
-        public EventsController(ApplicationContext dbContext, IWebHostEnvironment appEnvironment)
-        {
-            dbContext = dbContext;
-            _appEnvironment = appEnvironment;
-        }
-
     }
 }
