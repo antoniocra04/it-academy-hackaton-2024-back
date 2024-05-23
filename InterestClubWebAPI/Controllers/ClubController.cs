@@ -5,7 +5,7 @@ namespace InterestClubWebAPI.Controllers
     public class ClubController : Controller
     {
         [HttpPost("CreateClub")]
-        public IActionResult SingUp(string title, string deskription)
+        public IActionResult CreateClub(string title, string deskription)
         {
             using (ApplicationContext db = new ApplicationContext())
             {
