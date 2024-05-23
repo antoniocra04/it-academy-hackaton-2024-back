@@ -2,44 +2,29 @@
 using InterestClubWebAPI.Models;
 using Microsoft.EntityFrameworkCore;
 using InterestClubWebAPI.Context;
+using Microsoft.Extensions.Logging;
 
 namespace InterestClubWebAPI.Controllers
 {
     public class EventsController : Controller
     {
-        private readonly ApplicationContext dbContext;
-        IWebHostEnvironment _appEnvironment;
-        public IActionResult Index()
+        [HttpPost("DeleteEvent")]
+        public IActionResult DeleteEvent(string id) 
         {
-            return View();
-        }
-       
-
-        [HttpPost("DelEvent")]
-        public async Task<ActionResult> DelEvent(Event events) 
-        {
-
-            if ((dbContext.Events.Find(events.Id) == null))
+            using (ApplicationContext db = new ApplicationContext())
             {
-                return BadRequest("Event is not Found!");
-            }
-            else
-            {
-                dbContext.Events.Remove(events);
-                dbContext.SaveChanges();
-                return Ok();
+                if ((db.Events.Find(Guid.Parse(id)) == null))
+                {
+                    return BadRequest("Event is not Found!");
+                }
+                else
+                {
+                    db.Events.Remove(db.Events.Find(Guid.Parse(id)));
+                    db.SaveChanges();
+                    return Ok();
+                }
             }
            
-
         }
-        
-        public EventsController(ApplicationContext dbContext, IWebHostEnvironment appEnvironment)
-        {
-            dbContext = dbContext;
-            _appEnvironment = appEnvironment;
-        }
-
-
-
     }
 }
