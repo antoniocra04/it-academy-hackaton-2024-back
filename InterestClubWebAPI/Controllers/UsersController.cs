@@ -2,6 +2,7 @@
 using InterestClubWebAPI.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System;
 using System.Data.Entity;
 using System.Xml.Linq;
 
@@ -19,15 +20,17 @@ namespace InterestClubWebAPI.Controllers
         {
             using (ApplicationContext db = new ApplicationContext())
             {
+
                 if (db.Users.Any(user => user.Login == login))
                 {
                     return BadRequest();
                 }
                 else
-                {                    
-                    db.Users.Add(new User { Login = login, Password = password });
+                {
+                    User user = new User { Login = login, Password = password };
+                    db.Users.Add(user);
                     db.SaveChanges();
-                    return Ok();
+                    return Ok(user);
                 }
             }
         }
@@ -37,9 +40,10 @@ namespace InterestClubWebAPI.Controllers
         {
             using (ApplicationContext db = new ApplicationContext())
             {
-                if (db.Users.Any(user => user.Login == login && user.Password == password))
+                User? user = db.Users.FirstOrDefault(u => u.Login == login && u.Password == password);
+                if (user != null)
                 {
-                    return Ok();
+                    return Ok(user);
                 }
                 else
                 {
