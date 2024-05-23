@@ -14,6 +14,7 @@ namespace InterestClubWebAPI.Controllers
         public IActionResult CreateClub(string title, string description, string userId)
         {
             
+
                 using (ApplicationContext db = new ApplicationContext())
                 {
                     User? user = db.Users.FirstOrDefault(u => u.Id.ToString() == userId);
