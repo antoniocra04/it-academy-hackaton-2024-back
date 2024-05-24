@@ -21,10 +21,15 @@ namespace InterestClubWebAPI.Controllers
                 else
                 {    
                     DateTime eventDate = DateTime.Now;
-                    var guid = new Guid(idUser);
-                    User? user = db.Users.FirstOrDefault(u => u.Id == guid);
+                    var IdU = new Guid(idUser);
+                    User? user = db.Users.FirstOrDefault(u => u.Id == IdU);
                     List<User> part = new List <User> { user };
-                    db.Events.Add(new Event { Name = name, Description = description, EventDate = eventDate, Participants = part });
+                    Event ev = new Event { Name = name, Description = description, EventDate = eventDate};
+                    db.Events.Add(ev);
+                    db.SaveChanges();
+                    Event? even = db.Users.FirstOrDefault(e => e.Name == name);
+                    EventMember evMem = new EventMember { UserId = IdU, User = user, EventId = even.Id, Event = even};
+                    db.Events.Add(ev);
                     db.SaveChanges();
                     return Ok();
                 }
