@@ -1,4 +1,6 @@
-﻿namespace InterestClubWebAPI.Models
+﻿using static InterestClubWebAPI.Models.User;
+
+namespace InterestClubWebAPI.Models
 {
     public class Club
     {
@@ -6,12 +8,15 @@
 
         public string Title { get; set; }
 
-        public string? Description { get; set; }        
+        public string? Description { get; set; }
 
-        public virtual List<Event> Events { get; set; }
-
-        public virtual List<User> Members { get; set; }
-
-
+        public virtual ICollection<ClubEvent> ClubEvents { get; set; }
+        
+        
+        public Club()
+        {
+            ClubEvents = new List<ClubEvent>();            
+        }
     }
+    
 }

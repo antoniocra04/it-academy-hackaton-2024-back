@@ -4,27 +4,41 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Data.Entity;
 using System.Xml.Linq;
+using static InterestClubWebAPI.Models.User;
 
 namespace InterestClubWebAPI.Controllers
 {
     public class ClubController : Controller
     {
         [HttpPost("CreateClub")]
-        public IActionResult CreateClub(string title, string description)
+        public IActionResult CreateClub(string title, string description, string userId)
         {
-            using (ApplicationContext db = new ApplicationContext())
-            {                
-                if (db.Clubs.Any(Club => Club.Title == title))
+            
+
+                using (ApplicationContext db = new ApplicationContext())
                 {
-                    return BadRequest();
-                }
-                else
-                {                    
-                    db.Clubs.Add(new Club { Title = title, Description = description });
+                    User? user = db.Users.FirstOrDefault(u => u.Id.ToString() == userId);
+
+                    if (user == null)
+                    {
+                        return BadRequest("User not found.");
+                    }
+
+                    if (db.Clubs.Any(c => c.Title == title))
+                    {
+                        return BadRequest("Club with the same title already exists.");
+                    }
+
+                    Club club = new Club { Title = title, Description = description };
+                    db.Clubs.Add(club);
+
+                    UserClub userClub = new UserClub { User = user, Club = club };
+                    db.UserClubs.Add(userClub);
+
                     db.SaveChanges();
-                    return Ok();
+                    return Ok(club);
                 }
-            }
+            
         }
 
         [HttpPost("DeleteClub")]
@@ -32,9 +46,13 @@ namespace InterestClubWebAPI.Controllers
         {
             using (ApplicationContext db = new ApplicationContext())
             {
-                if (db.Clubs.Any(club => club.Title == title))
+                Club club = db.Clubs.FirstOrDefault(club => club.Title == title);
+                if (club != null)
                 {
-                    db.Clubs.Remove(db.Clubs.Where(club => club.Title == title).FirstOrDefault());
+                    db.Clubs.Remove(club);
+
+                    var userClubsToRemove = db.UserClubs.Where(uc => uc.Club.Title == title);
+                    db.UserClubs.RemoveRange(userClubsToRemove);
                     db.SaveChanges();
                     return Ok();
                 }

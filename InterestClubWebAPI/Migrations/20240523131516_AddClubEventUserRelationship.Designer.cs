@@ -3,6 +3,7 @@ using System;
 using InterestClubWebAPI.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace InterestClubWebAPI.Migrations
 {
     [DbContext(typeof(ApplicationContext))]
-    partial class ApplicationContextModelSnapshot : ModelSnapshot
+    [Migration("20240523131516_AddClubEventUserRelationship")]
+    partial class AddClubEventUserRelationship
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -40,7 +43,7 @@ namespace InterestClubWebAPI.Migrations
                     b.ToTable("Clubs");
                 });
 
-            modelBuilder.Entity("InterestClubWebAPI.Models.ClubEvent", b =>
+            modelBuilder.Entity("InterestClubWebAPI.Models.Club+ClubEvent", b =>
                 {
                     b.Property<Guid>("ClubId")
                         .HasColumnType("uuid");
@@ -76,7 +79,7 @@ namespace InterestClubWebAPI.Migrations
                     b.ToTable("Events");
                 });
 
-            modelBuilder.Entity("InterestClubWebAPI.Models.EventMember", b =>
+            modelBuilder.Entity("InterestClubWebAPI.Models.Event+EventMember", b =>
                 {
                     b.Property<Guid>("EventId")
                         .HasColumnType("uuid");
@@ -122,7 +125,7 @@ namespace InterestClubWebAPI.Migrations
                     b.ToTable("Users");
                 });
 
-            modelBuilder.Entity("InterestClubWebAPI.Models.UserClub", b =>
+            modelBuilder.Entity("InterestClubWebAPI.Models.User+UserClub", b =>
                 {
                     b.Property<Guid>("UserId")
                         .HasColumnType("uuid");
@@ -137,7 +140,7 @@ namespace InterestClubWebAPI.Migrations
                     b.ToTable("UserClubs");
                 });
 
-            modelBuilder.Entity("InterestClubWebAPI.Models.ClubEvent", b =>
+            modelBuilder.Entity("InterestClubWebAPI.Models.Club+ClubEvent", b =>
                 {
                     b.HasOne("InterestClubWebAPI.Models.Club", "Club")
                         .WithMany("ClubEvents")
@@ -156,7 +159,7 @@ namespace InterestClubWebAPI.Migrations
                     b.Navigation("Event");
                 });
 
-            modelBuilder.Entity("InterestClubWebAPI.Models.EventMember", b =>
+            modelBuilder.Entity("InterestClubWebAPI.Models.Event+EventMember", b =>
                 {
                     b.HasOne("InterestClubWebAPI.Models.Event", "Event")
                         .WithMany("EventMembers")
@@ -175,7 +178,7 @@ namespace InterestClubWebAPI.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("InterestClubWebAPI.Models.UserClub", b =>
+            modelBuilder.Entity("InterestClubWebAPI.Models.User+UserClub", b =>
                 {
                     b.HasOne("InterestClubWebAPI.Models.Club", "Club")
                         .WithMany("UserClubs")

@@ -1,4 +1,5 @@
 ﻿using InterestClubWebAPI.Enums;
+
 namespace InterestClubWebAPI.Models
 {
     public class User
@@ -17,5 +18,17 @@ namespace InterestClubWebAPI.Models
 
         public Role Role { get; set; }
 
+        public virtual ICollection<UserClub> UserClubs { get; set; }
+
+        public virtual ICollection<EventMember> EventMembers { get; set; }
+
+        public User()
+        {
+            UserClubs = new List<UserClub>();
+            EventMembers = new List<EventMember>();
+        }       
+
+
     }
+    
 }
