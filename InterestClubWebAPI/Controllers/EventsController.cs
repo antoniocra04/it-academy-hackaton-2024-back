@@ -3,7 +3,10 @@ using InterestClubWebAPI.Models;
 using Microsoft.EntityFrameworkCore;
 using InterestClubWebAPI.Context;
 using Microsoft.Extensions.Logging;
-using System.Data.Entity;
+using InterestClubWebAPI.Extensions;
+using InterestClubWebAPI.Models.InterestClubWebAPI.DTOs;
+using static System.Reflection.Metadata.BlobBuilder;
+//using System.Data.Entity;
 
 
 namespace InterestClubWebAPI.Controllers
@@ -21,12 +24,9 @@ namespace InterestClubWebAPI.Controllers
                 {
                     return BadRequest("Event with the same name already exists.");
                 }
-
-                var userId = Guid.Parse(idUser);
-                var clubId = Guid.Parse(idClub);
-
-                var user = _context.Users.FirstOrDefault(u => u.Id == userId);
-                var club = _context.Clubs.FirstOrDefault(c => c.Id == clubId);
+                
+                User? user = _context.Users.FirstOrDefault(u => u.Id.ToString() == idUser);
+                Club? club = _context.Clubs.FirstOrDefault(c => c.Id.ToString() == idClub);
 
                 if (user == null || club == null)
                 {
@@ -35,38 +35,34 @@ namespace InterestClubWebAPI.Controllers
 
                 var eventDate = DateTime.Now;
                 var ev = new Event { Name = name, Description = description, EventDate = eventDate.ToString() };//
-
+                ev.CreatorEventID = user.Id;
+                ev.ClubID = club.Id;
+                ev.Members.Add(user);
                 _context.Events.Add(ev);
-                _context.SaveChanges(); // Save changes to generate the Event Id
-
-                var evMem = new EventMember { UserId = user.Id, EventId = ev.Id };
-                _context.EventMembers.Add(evMem);
-
-                var clubEv = new ClubEvent { EventId = ev.Id, ClubId = club.Id };
-                _context.ClubEvents.Add(clubEv);
-
-                _context.SaveChanges();                
-                return Ok(ev);
+                _context.SaveChanges();
+                var eventDTO = ev.ToDTO();
+                return Ok(eventDTO);
             }
         }
-        [HttpPost("DeleteEvent")]
+        [HttpDelete("DeleteEvent")]
         public IActionResult DeleteEvent(string id)
         {
             using (ApplicationContext db = new ApplicationContext())
             {
-                if ((db.Events.Find(Guid.Parse(id)) == null))
+                Event? ev = db.Events.FirstOrDefault(e => e.Id.ToString() == id);
+                if (ev == null)
                 {
                     return BadRequest("Event is not Found!");
                 }
                 else
                 {                    
-                    db.Events.Remove(db.Events.Find(Guid.Parse(id)));
+                    db.Events.Remove(ev);
 
-                    var EventMemberToRemove = db.EventMembers.Where(em => em.EventId.ToString() == id);
-                    var ClubEventToRemove = db.ClubEvents.Where(em => em.EventId.ToString() == id);
+                    //var EventMemberToRemove = db.EventMembers.Where(em => em.EventId.ToString() == id);
+                    //var ClubEventToRemove = db.ClubEvents.Where(em => em.EventId.ToString() == id);
 
-                    db.EventMembers.RemoveRange(EventMemberToRemove);
-                    db.ClubEvents.RemoveRange(ClubEventToRemove);
+                    //db.EventMembers.RemoveRange(EventMemberToRemove);
+                    //db.ClubEvents.RemoveRange(ClubEventToRemove);
                     db.SaveChanges();
                     return Ok();
                 }
@@ -75,14 +71,47 @@ namespace InterestClubWebAPI.Controllers
 
         }
 
-        [HttpGet("getAllUserEvents")]
-        public IActionResult GetAllEvents(string id)
+        [HttpGet("getEvent")]
+        public IActionResult getEvent(string id)
         {
             using (ApplicationContext db = new ApplicationContext())
             {
+                Event? ev = db.Events.Include(e => e.Members).FirstOrDefault(e => e.Id.ToString() == id);
+                if (ev == null)
+                {
+                    return BadRequest("Такого Ивента нет :(");
+                }
+                else
+                {
+                    var eventDTO = ev.ToDTO();
+                    return Ok(eventDTO);
+                }
+            }
+        }
+        [HttpGet("getAllEvents")]
+        public IActionResult getAllEvents(string id)
+        {
+            using (ApplicationContext db = new ApplicationContext())
+            {
+                var events = db.Events.Include(e => e.Members).ToList().Where(e => e.ClubID.ToString() == id);                
+                if (events.Any())
+                {
+                    List<EventDTO> eventDTOs = new List<EventDTO>();
 
-                return Ok();
-            }                
+                    foreach (var ev in events)
+                    {
+                        var eventDTO = ev.ToDTO();
+                        eventDTOs.Add(eventDTO);
+                    }
+                    
+                    return Ok(eventDTOs);
+                    
+                }
+                else
+                {
+                    return BadRequest("Такого Ивента нет :(");
+                }
+            }
         }
     }
 }

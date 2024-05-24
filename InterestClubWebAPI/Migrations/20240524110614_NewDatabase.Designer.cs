@@ -3,6 +3,7 @@ using System;
 using InterestClubWebAPI.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace InterestClubWebAPI.Migrations
 {
     [DbContext(typeof(ApplicationContext))]
-    partial class ApplicationContextModelSnapshot : ModelSnapshot
+    [Migration("20240524110614_NewDatabase")]
+    partial class NewDatabase
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -55,10 +58,6 @@ namespace InterestClubWebAPI.Migrations
             modelBuilder.Entity("InterestClubWebAPI.Models.Club", b =>
                 {
                     b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("CreatorClubID")
                         .HasColumnType("uuid");
 
                     b.Property<string>("Description")
@@ -76,13 +75,9 @@ namespace InterestClubWebAPI.Migrations
             modelBuilder.Entity("InterestClubWebAPI.Models.Event", b =>
                 {
                     b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<Guid>("ClubID")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("CreatorEventID")
+                    b.Property<Guid>("ClubId")
                         .HasColumnType("uuid");
 
                     b.Property<string>("Description")
@@ -98,7 +93,7 @@ namespace InterestClubWebAPI.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ClubID");
+                    b.HasIndex("ClubId");
 
                     b.ToTable("Events");
                 });
@@ -164,13 +159,34 @@ namespace InterestClubWebAPI.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("InterestClubWebAPI.Models.Event", b =>
+            modelBuilder.Entity("InterestClubWebAPI.Models.Club", b =>
                 {
-                    b.HasOne("InterestClubWebAPI.Models.Club", null)
-                        .WithMany("Events")
-                        .HasForeignKey("ClubID")
+                    b.HasOne("InterestClubWebAPI.Models.User", "CreatorClub")
+                        .WithMany()
+                        .HasForeignKey("Id")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("CreatorClub");
+                });
+
+            modelBuilder.Entity("InterestClubWebAPI.Models.Event", b =>
+                {
+                    b.HasOne("InterestClubWebAPI.Models.Club", "Club")
+                        .WithMany("Events")
+                        .HasForeignKey("ClubId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("InterestClubWebAPI.Models.User", "CreatorEvent")
+                        .WithMany()
+                        .HasForeignKey("Id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Club");
+
+                    b.Navigation("CreatorEvent");
                 });
 
             modelBuilder.Entity("InterestClubWebAPI.Models.Club", b =>
