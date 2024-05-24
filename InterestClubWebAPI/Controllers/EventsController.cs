@@ -1,14 +1,14 @@
-﻿﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
+using InterestClubWebAPI.Models;
+using Microsoft.EntityFrameworkCore;
+using InterestClubWebAPI.Context;
+using Microsoft.Extensions.Logging;
+
 
 namespace InterestClubWebAPI.Controllers
 {
     public class EventsController : Controller
-    {
-        public IActionResult Index()
-        {
-            return View();
-        }       
-        
+    {    
         [HttpPost("AddEvent")]
         public IActionResult AddEvent(string name, string description, string idUser, string idClub)
         {
@@ -39,5 +39,23 @@ namespace InterestClubWebAPI.Controllers
                 }
             }
         }
+                [HttpPost("DeleteEvent")]
+           public IActionResult DeleteEvent(string id) 
+           {            
+                using (ApplicationContext db = new ApplicationContext())
+                {
+                if ((db.Events.Find(Guid.Parse(id)) == null))
+                {
+                    return BadRequest("Event is not Found!");
+                }
+                else
+                {
+                    db.Events.Remove(db.Events.Find(Guid.Parse(id)));
+                    db.SaveChanges();
+                    return Ok();
+                }
+            }
+
+        
     }
 }
