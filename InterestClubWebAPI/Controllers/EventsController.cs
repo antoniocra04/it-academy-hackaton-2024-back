@@ -10,7 +10,7 @@ namespace InterestClubWebAPI.Controllers
         }       
         
         [HttpPost("AddEvent")]
-        public IActionResult AddEvent(string name, string description, string idUser)
+        public IActionResult AddEvent(string name, string description, string idUser, string idClub)
         {
             using (ApplicationContext db = new ApplicationContext())
             {                               
@@ -22,14 +22,18 @@ namespace InterestClubWebAPI.Controllers
                 {    
                     DateTime eventDate = DateTime.Now;
                     var IdU = new Guid(idUser);
+                    var IdC = new Guid(idClub);
                     User? user = db.Users.FirstOrDefault(u => u.Id == IdU);
-                    List<User> part = new List <User> { user };
+                    Club? club = db.Clubs.FirstOrDefault(c => c.Id == IdC);
                     Event ev = new Event { Name = name, Description = description, EventDate = eventDate};
                     db.Events.Add(ev);
                     db.SaveChanges();
                     Event? even = db.Users.FirstOrDefault(e => e.Name == name);
                     EventMember evMem = new EventMember { UserId = IdU, User = user, EventId = even.Id, Event = even};
-                    db.Events.Add(ev);
+                    db.EventMembers.Add(evMem);
+                    db.SaveChanges();
+                    ClubEvent clubEv = new ClubEvent { EventId = even.Id, Event = even, ClubId = IdC, Club = club };
+                    db.ClubEvents.Add(clubEv);
                     db.SaveChanges();
                     return Ok();
                 }
