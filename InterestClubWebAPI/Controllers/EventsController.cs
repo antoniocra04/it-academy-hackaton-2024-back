@@ -59,14 +59,30 @@ namespace InterestClubWebAPI.Controllers
                     return BadRequest("Event is not Found!");
                 }
                 else
-                {
+                {                    
                     db.Events.Remove(db.Events.Find(Guid.Parse(id)));
+
+                    var EventMemberToRemove = db.EventMembers.Where(em => em.EventId.ToString() == id);
+                    var ClubEventToRemove = db.ClubEvents.Where(em => em.EventId.ToString() == id);
+
+                    db.EventMembers.RemoveRange(EventMemberToRemove);
+                    db.ClubEvents.RemoveRange(ClubEventToRemove);
                     db.SaveChanges();
                     return Ok();
                 }
             }
 
 
+        }
+
+        [HttpGet("getAllUserEvents")]
+        public IActionResult GetAllEvents(string id)
+        {
+            using (ApplicationContext db = new ApplicationContext())
+            {
+
+                return Ok();
+            }                
         }
     }
 }

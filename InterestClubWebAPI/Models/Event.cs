@@ -12,15 +12,15 @@ namespace InterestClubWebAPI.Models
         public string? Description { get; set; }
 
         //public string? Type { get; set; }
+        public User CreatorEvent { get; set; }
 
         public string EventDate { get; set; }
 
-        //public virtual ICollection<EventMember> EventMembers { get; set; }
-        
+        public List<User> EventMembers { get; set; }
 
-        //public Event()
-        //{
-        //    EventMembers = new List<EventMember>();            
-        //}        
+        public Event()
+        {
+            EventMembers = new List<User>();
+        }
     }  
 }

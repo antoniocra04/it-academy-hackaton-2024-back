@@ -18,14 +18,14 @@ namespace InterestClubWebAPI.Models
 
         public Role Role { get; set; }
 
-        public virtual ICollection<UserClub> UserClubs { get; set; }
+        public virtual List<Club> UserClubs { get; set; }
 
-        public virtual ICollection<EventMember> EventMembers { get; set; }
+        public virtual List<Event> UserEvents { get; set; }
 
         public User()
         {
-            UserClubs = new List<UserClub>();
-            EventMembers = new List<EventMember>();
+            UserClubs = new List<Club>();
+            UserEvents = new List<Event>();
         }       
 
 

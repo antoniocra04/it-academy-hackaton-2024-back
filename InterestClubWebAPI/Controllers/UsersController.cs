@@ -42,9 +42,13 @@ namespace InterestClubWebAPI.Controllers
         {
             using (ApplicationContext db = new ApplicationContext())
             {
-                User? user = db.Users.FirstOrDefault(u => u.Login == login && u.Password == password);
+                User? user = Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions
+                    .Include(db.Users, u => u.UserClubs)
+                    .FirstOrDefault(u => u.Login == login && u.Password == password);
+
                 if (user != null)
                 {
+                    //db.Entry(user).Collection(u => u.UserClubs).Load();
                     return Ok(user);
                 }
                 else

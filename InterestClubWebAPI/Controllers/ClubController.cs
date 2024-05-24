@@ -54,6 +54,8 @@ namespace InterestClubWebAPI.Controllers
                     db.Clubs.Remove(club);
 
                     var userClubsToRemove = db.UserClubs.Where(uc => uc.Club.Title == title);
+                    var ClubEventToRemove = db.UserClubs.Where(ce => ce.Club.Title == title);
+                    db.UserClubs.RemoveRange(ClubEventToRemove);
                     db.UserClubs.RemoveRange(userClubsToRemove);
                     db.SaveChanges();
                     return Ok();

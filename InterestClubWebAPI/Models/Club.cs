@@ -10,12 +10,12 @@ namespace InterestClubWebAPI.Models
 
         public string? Description { get; set; }
 
-        public virtual ICollection<ClubEvent> ClubEvents { get; set; }
-        
-        
+        public User CreatorClub { get; set; }
+        public ICollection<ClubEvent> ClubEvents { get; set; }
+
         public Club()
         {
-            ClubEvents = new List<ClubEvent>();            
+            ClubEvents = new List<ClubEvent>();
         }
     }
     
