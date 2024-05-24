@@ -58,10 +58,10 @@ namespace InterestClubWebAPI.Context
             modelBuilder.Entity<EventMember>()
                 .HasKey(em => new { em.EventId, em.UserId });
 
-            modelBuilder.Entity<EventMember>()
-                .HasOne(em => em.Event)
-                .WithMany(e => e.EventMembers)
-                .HasForeignKey(em => em.EventId);
+            //modelBuilder.Entity<EventMember>()
+            //    .HasOne(em => em.Event)
+            //    .WithMany(e => e.EventMembers)
+            //    .HasForeignKey(em => em.EventId);
 
             modelBuilder.Entity<EventMember>()
                 .HasOne(em => em.User)

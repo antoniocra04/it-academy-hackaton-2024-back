@@ -8,6 +8,8 @@ using static InterestClubWebAPI.Models.User;
 
 namespace InterestClubWebAPI.Controllers
 {
+    //[Route("api/[controller]")]
+    //[ApiController]
     public class ClubController : Controller
     {
         [HttpPost("CreateClub")]

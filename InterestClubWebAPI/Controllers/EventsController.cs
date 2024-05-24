@@ -3,47 +3,57 @@ using InterestClubWebAPI.Models;
 using Microsoft.EntityFrameworkCore;
 using InterestClubWebAPI.Context;
 using Microsoft.Extensions.Logging;
+using System.Data.Entity;
 
 
 namespace InterestClubWebAPI.Controllers
 {
+    //[Route("api/[controller]")]
+    //[ApiController]
     public class EventsController : Controller
-    {    
+    {
         [HttpPost("AddEvent")]
         public IActionResult AddEvent(string name, string description, string idUser, string idClub)
         {
-            using (ApplicationContext db = new ApplicationContext())
-            {                               
-                if (db.Events.Any(Event => Event.Name == name))
+            using (ApplicationContext _context = new ApplicationContext())
+            {
+                if (_context.Events.Any(e => e.Name == name))
                 {
-                    return BadRequest();
+                    return BadRequest("Event with the same name already exists.");
                 }
-                else
-                {    
-                    DateTime eventDate = DateTime.Now;
-                    var IdU = new Guid(idUser);
-                    var IdC = new Guid(idClub);
-                    User? user = db.Users.FirstOrDefault(u => u.Id == IdU);
-                    Club? club = db.Clubs.FirstOrDefault(c => c.Id == IdC);
-                    Event ev = new Event { Name = name, Description = description, EventDate = eventDate};
-                    db.Events.Add(ev);
-                    db.SaveChanges();
-                    Event? even = db.Users.FirstOrDefault(e => e.Name == name);
-                    EventMember evMem = new EventMember { UserId = IdU, User = user, EventId = even.Id, Event = even};
-                    db.EventMembers.Add(evMem);
-                    db.SaveChanges();
-                    ClubEvent clubEv = new ClubEvent { EventId = even.Id, Event = even, ClubId = IdC, Club = club };
-                    db.ClubEvents.Add(clubEv);
-                    db.SaveChanges();
-                    return Ok();
+
+                var userId = Guid.Parse(idUser);
+                var clubId = Guid.Parse(idClub);
+
+                var user = _context.Users.FirstOrDefault(u => u.Id == userId);
+                var club = _context.Clubs.FirstOrDefault(c => c.Id == clubId);
+
+                if (user == null || club == null)
+                {
+                    return BadRequest("User or Club not found.");
                 }
+
+                var eventDate = DateTime.Now;
+                var ev = new Event { Name = name, Description = description, EventDate = eventDate.ToString() };//
+
+                _context.Events.Add(ev);
+                _context.SaveChanges(); // Save changes to generate the Event Id
+
+                var evMem = new EventMember { UserId = user.Id, EventId = ev.Id };
+                _context.EventMembers.Add(evMem);
+
+                var clubEv = new ClubEvent { EventId = ev.Id, ClubId = club.Id };
+                _context.ClubEvents.Add(clubEv);
+
+                _context.SaveChanges();                
+                return Ok(ev);
             }
         }
-                [HttpPost("DeleteEvent")]
-           public IActionResult DeleteEvent(string id) 
-           {            
-                using (ApplicationContext db = new ApplicationContext())
-                {
+        [HttpPost("DeleteEvent")]
+        public IActionResult DeleteEvent(string id)
+        {
+            using (ApplicationContext db = new ApplicationContext())
+            {
                 if ((db.Events.Find(Guid.Parse(id)) == null))
                 {
                     return BadRequest("Event is not Found!");
@@ -56,6 +66,7 @@ namespace InterestClubWebAPI.Controllers
                 }
             }
 
-        
+
+        }
     }
 }

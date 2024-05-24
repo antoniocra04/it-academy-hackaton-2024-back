@@ -8,6 +8,8 @@ using System.Xml.Linq;
 
 namespace InterestClubWebAPI.Controllers
 {
+    //[Route("api/[controller]")]
+    //[ApiController]
     public class UsersController : Controller
     {
         public IActionResult Index()
