@@ -1,7 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using InterestClubWebAPI.Models;
-using static InterestClubWebAPI.Models.User;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
+
 
 
 namespace InterestClubWebAPI.Context
@@ -14,19 +13,20 @@ namespace InterestClubWebAPI.Context
 
         public DbSet<Club> Clubs { get; set; }
 
+
+
         
-
-        public ApplicationContext()
+        public ApplicationContext(DbContextOptions<ApplicationContext> options) : base(options)
         {
 
         }
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
-            
-            optionsBuilder.UseNpgsql("Host=aws-0-eu-central-1.pooler.supabase.com;Port=5432;Database=postgres;Username=postgres.ljhexoykjtmlvbjpriks;Password=Hackaton20052024");
-            //optionsBuilder.EnableSensitiveDataLogging();
-            //optionsBuilder.UseLazyLoadingProxies();
-        }
+        //protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        //{
+
+        //    optionsBuilder.UseNpgsql("Host=aws-0-eu-central-1.pooler.supabase.com;Port=5432;Database=postgres;Username=postgres.ljhexoykjtmlvbjpriks;Password=Hackaton20052024");
+        //    //optionsBuilder.EnableSensitiveDataLogging();
+        //    //optionsBuilder.UseLazyLoadingProxies();
+        //}
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

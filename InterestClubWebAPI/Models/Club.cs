@@ -10,6 +10,8 @@ namespace InterestClubWebAPI.Models
 
         public string? Description { get; set; }
 
+        public string? FullDescription { get; set; }
+
         public Guid CreatorClubID { get; set; }
 
         public ICollection<User> Users { get; set; }
@@ -21,7 +23,7 @@ namespace InterestClubWebAPI.Models
             Users = new List<User>();
         }
     }
-    // ClubDTO.cs
+
     namespace InterestClubWebAPI.DTOs
     {
         public class ClubDTO
@@ -29,9 +31,12 @@ namespace InterestClubWebAPI.Models
             public Guid Id { get; set; }
             public string Title { get; set; }
             public string? Description { get; set; }
+            public string? FullDescription { get; set; }
             public Guid CreatorClubID { get; set; }
             public List<UserDTO> Users { get; set; }
             public List<EventDTO> Events { get; set; }
+
+            public int CountMembers { get; set; }
 
             public ClubDTO()
             {
