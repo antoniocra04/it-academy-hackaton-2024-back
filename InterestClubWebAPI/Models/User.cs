@@ -18,17 +18,31 @@ namespace InterestClubWebAPI.Models
 
         public Role Role { get; set; }
 
-        public virtual ICollection<UserClub> UserClubs { get; set; }
+        public  List<Club> Clubs { get; set; }
 
-        public virtual ICollection<EventMember> EventMembers { get; set; }
+        public List<Event> Events { get; set; }
 
         public User()
         {
-            UserClubs = new List<UserClub>();
-            EventMembers = new List<EventMember>();
+            Clubs = new List<Club>();
+            Events = new List<Event>();
         }       
 
 
     }
-    
+    // UserDTO.cs
+    namespace InterestClubWebAPI.DTOs
+    {
+        public class UserDTO
+        {
+            public Guid Id { get; set; }
+            public string? Name { get; set; }
+            public string? Surname { get; set; }
+            public string Login { get; set; }
+            public string Password { get; set; }
+            public string? Fatherland { get; set; }
+            public Role Role { get; set; }
+            // Exclude Clubs to prevent circular reference
+        }
+    }
 }
