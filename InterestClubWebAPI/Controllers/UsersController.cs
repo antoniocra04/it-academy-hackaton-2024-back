@@ -71,7 +71,13 @@ namespace InterestClubWebAPI.Controllers
                 var tokenResponse = _authentication.GenerateJWT(user);
                 if (tokenResponse.code == 200)
                 {
-                    return Ok(new { token = tokenResponse.Data });
+                    var response = new
+                    {
+                        access_token = tokenResponse.Data,
+                        user = user.ToDTO()
+                    };
+                
+                    return Ok(response);
                 }
                 return BadRequest(tokenResponse.message);
             }

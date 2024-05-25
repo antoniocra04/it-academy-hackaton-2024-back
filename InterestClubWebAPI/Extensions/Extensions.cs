@@ -31,7 +31,8 @@ namespace InterestClubWebAPI.Extensions
                 Id = user.Id,
                 Name = user.Name,
                 Surname = user.Surname,
-                Login = user.Login,                
+                Login = user.Login, 
+                Password = user.Password,
                 Fatherland = user.Fatherland,
                 Role = user.Role                
             };
