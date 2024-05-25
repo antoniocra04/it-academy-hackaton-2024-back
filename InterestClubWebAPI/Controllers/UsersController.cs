@@ -124,7 +124,7 @@ namespace InterestClubWebAPI.Controllers
         public IActionResult DeleteUser(string login, string password)
         {
             User? user = _db.Users.FirstOrDefault(u => u.Login == login && u.Password == password);
-
+            //HttpContext.Response.Headers
             if (user != null)
             {
                 _db.Users.Remove(user);

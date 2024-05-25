@@ -16,7 +16,8 @@ namespace InterestClubWebAPI.Extensions
                 FullDescription = club.FullDescription,
                 CreatorClubID = club.CreatorClubID,
                 Users = club.Users.Select(u => u.ToDTO()).ToList(),
-                Events = club.Events.Select(e => e.ToDTO()).ToList()
+                Events = club.Events.Select(e => e.ToDTO()).ToList(),
+                CountMembers = club.Users.Count()
             };
         }
     }

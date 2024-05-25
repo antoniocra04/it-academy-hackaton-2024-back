@@ -36,6 +36,8 @@ namespace InterestClubWebAPI.Models
             public List<UserDTO> Users { get; set; }
             public List<EventDTO> Events { get; set; }
 
+            public int CountMembers { get; set; }
+
             public ClubDTO()
             {
                 Users = new List<UserDTO>();

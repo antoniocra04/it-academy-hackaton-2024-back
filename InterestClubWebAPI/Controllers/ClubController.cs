@@ -90,7 +90,7 @@ namespace InterestClubWebAPI.Controllers
                     clubDTOs.Add(clubDTO);
                 }
 
-                return Ok(new { Count = clubDTOs.Count, Clubs = clubDTOs });
+                return Ok(clubDTOs);
             }
             else
             {
