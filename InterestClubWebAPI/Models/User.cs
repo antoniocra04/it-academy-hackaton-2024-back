@@ -30,7 +30,6 @@ namespace InterestClubWebAPI.Models
 
 
     }
-    // UserDTO.cs
     namespace InterestClubWebAPI.DTOs
     {
         public class UserDTO
@@ -38,11 +37,9 @@ namespace InterestClubWebAPI.Models
             public Guid Id { get; set; }
             public string? Name { get; set; }
             public string? Surname { get; set; }
-            public string Login { get; set; }
-            public string Password { get; set; }
+            public string Login { get; set; }           
             public string? Fatherland { get; set; }
-            public Role Role { get; set; }
-            // Exclude Clubs to prevent circular reference
+            public Role Role { get; set; }            
         }
     }
 }

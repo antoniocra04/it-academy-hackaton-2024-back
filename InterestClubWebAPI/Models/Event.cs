@@ -12,7 +12,7 @@ namespace InterestClubWebAPI.Models
 
         public Guid CreatorEventID { get; set; }
 
-        public Guid ClubID { get; set; } // Added Club property
+        public Guid ClubID { get; set; } 
 
         public string EventDate { get; set; }
 
@@ -23,7 +23,7 @@ namespace InterestClubWebAPI.Models
             Members = new List<User>();
         }
     }
-    // EventDTO.cs
+
     namespace InterestClubWebAPI.DTOs
     {
         public class EventDTO

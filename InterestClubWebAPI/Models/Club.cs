@@ -23,7 +23,7 @@ namespace InterestClubWebAPI.Models
             Users = new List<User>();
         }
     }
-    // ClubDTO.cs
+
     namespace InterestClubWebAPI.DTOs
     {
         public class ClubDTO

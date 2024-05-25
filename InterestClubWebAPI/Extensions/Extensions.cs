@@ -1,7 +1,7 @@
 ﻿using InterestClubWebAPI.Models.InterestClubWebAPI.DTOs;
 using InterestClubWebAPI.Models;
 
-// ClubExtensions.cs
+
 namespace InterestClubWebAPI.Extensions
 {
     public static class ClubExtensions
@@ -30,11 +30,9 @@ namespace InterestClubWebAPI.Extensions
                 Id = user.Id,
                 Name = user.Name,
                 Surname = user.Surname,
-                Login = user.Login,
-                Password = user.Password,
+                Login = user.Login,                
                 Fatherland = user.Fatherland,
-                Role = user.Role
-                // Exclude Clubs to prevent circular reference
+                Role = user.Role                
             };
         }
     }
