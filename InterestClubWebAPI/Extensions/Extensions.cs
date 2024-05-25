@@ -13,6 +13,7 @@ namespace InterestClubWebAPI.Extensions
                 Id = club.Id,
                 Title = club.Title,
                 Description = club.Description,
+                FullDescription = club.FullDescription,
                 CreatorClubID = club.CreatorClubID,
                 Users = club.Users.Select(u => u.ToDTO()).ToList(),
                 Events = club.Events.Select(e => e.ToDTO()).ToList()

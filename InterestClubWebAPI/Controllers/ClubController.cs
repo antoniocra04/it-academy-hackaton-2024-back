@@ -17,7 +17,7 @@ namespace InterestClubWebAPI.Controllers
     public class ClubController : Controller
     {
         [HttpPost("CreateClub")]
-        public IActionResult CreateClub(string title, string description, string userId)
+        public IActionResult CreateClub(string title, string description,string fullDescription, string userId)
         {
             
 
@@ -35,7 +35,7 @@ namespace InterestClubWebAPI.Controllers
                         return BadRequest("Club with the same title already exists.");
                     }
 
-                    Club club = new Club { Title = title, Description = description ,CreatorClubID = user.Id};
+                    Club club = new Club { Title = title, Description = description,FullDescription = fullDescription, CreatorClubID = user.Id};
                     club.CreatorClubID = user.Id;
                     club.Users.Add(user);
                     db.Clubs.Add(club);                    
@@ -108,7 +108,8 @@ namespace InterestClubWebAPI.Controllers
                         var clubDTO = club.ToDTO();
                         clubDTOs.Add(clubDTO);
                     }
-                    return Ok(clubDTOs);
+                    
+                    return Ok(new { Count = clubDTOs.Count, Clubs = clubDTOs });
                 }
                 else
                 {

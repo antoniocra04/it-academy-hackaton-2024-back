@@ -13,9 +13,9 @@ using static System.Reflection.Metadata.BlobBuilder;
 
 namespace InterestClubWebAPI.Controllers
 {
-    
-    
-    
+
+
+
     //[Route("api/[controller]")]
     //[ApiController]
     public class UsersController : Controller
@@ -28,7 +28,7 @@ namespace InterestClubWebAPI.Controllers
 
                 if (db.Users.Any(user => user.Login == login))
                 {
-                    return BadRequest();
+                    return BadRequest("Такой пользователь уже существует");
                 }
                 else
                 {
@@ -37,7 +37,7 @@ namespace InterestClubWebAPI.Controllers
                     db.SaveChanges();
                     var userDTO = user.ToDTO();
                     return Ok(userDTO);
-                    
+
                 }
             }
         }
@@ -47,7 +47,11 @@ namespace InterestClubWebAPI.Controllers
         {
             using (ApplicationContext db = new ApplicationContext())
             {
-                User? user = db.Users.FirstOrDefault(u => u.Login == login && u.Password == password);
+                User? user = db.Users
+    .Include(u => u.Clubs)
+    .Include(u => u.Events)
+    .FirstOrDefault(u => u.Login == login && u.Password == password);
+
 
                 if (user != null)
                 {
@@ -56,7 +60,7 @@ namespace InterestClubWebAPI.Controllers
                 }
                 else
                 {
-                    return BadRequest("Не верные данные ");
+                    return BadRequest("Введен неправильный пароль, либо такого пользователя не существует");
                 }
             }
         }
@@ -65,14 +69,14 @@ namespace InterestClubWebAPI.Controllers
         {
             using (ApplicationContext db = new ApplicationContext())
             {
-                
+
                 var users = db.Users.ToList();
                 //foreach (var user in users)
                 //{
                 //    db.Entry(user).Collection(u => u.Clubs).Load();
                 //    db.Entry(user).Collection(u => u.Events).Load();
                 //}
-                
+
                 if (users.Any())
                 {
                     List<UserDTO> userDTOs = new List<UserDTO>();
@@ -91,7 +95,7 @@ namespace InterestClubWebAPI.Controllers
 
             }
         }
-        [HttpGet("GetUserToId")]
+        [HttpGet("GetUserById")]
         public IActionResult GetUserToId(string id)
         {
             using (ApplicationContext db = new ApplicationContext())
@@ -142,15 +146,43 @@ namespace InterestClubWebAPI.Controllers
                 }
             }
         }
-
-        [HttpPost("EditUser")]
-        public IActionResult EditUser(string login,string password,string name,string surname,string fatherland)
+        [HttpDelete("DeleteUserByAdmin")]
+        public IActionResult DeleteUser(string adminLogin, string adminPassword, string userLogin)
         {
-            
+
 
             using (ApplicationContext db = new ApplicationContext())
             {
-               
+                User? adminUser = db.Users.FirstOrDefault(u => u.Login == adminLogin && u.Password == adminPassword);
+                if (adminUser == null)
+                {
+                    return BadRequest($"Нет админа под логином {adminLogin}");
+                }
+                if (adminUser.Role != Enums.Role.admin)
+                {
+                    return BadRequest("Нет прав админа");
+                }
+                User? user = db.Users.FirstOrDefault(u => u.Login == userLogin);
+                if (user != null)
+                {
+                    db.Users.Remove(user);
+                    db.SaveChanges();
+                    return Ok("Пользователь Удален");
+                }
+                else
+                {
+                    return BadRequest($"Нет пользователя под логином: {userLogin}"); ; ;
+                }
+            }
+        }
+        [HttpPost("EditUser")]
+        public IActionResult EditUser(string login, string password, string name, string surname, string fatherland)
+        {
+
+
+            using (ApplicationContext db = new ApplicationContext())
+            {
+
                 User? user = db.Users.FirstOrDefault(u => u.Login == login && u.Password == password);
 
 
@@ -169,5 +201,95 @@ namespace InterestClubWebAPI.Controllers
                 }
             }
         }
+        [HttpPost("JoinInClub")]
+        public IActionResult JoinInClub(string login, string password, string clubId)
+        {
+
+
+            using (ApplicationContext db = new ApplicationContext())
+            {
+                User? user = db.Users.FirstOrDefault(u => u.Login == login && u.Password == password);
+                if (user == null)
+                {
+                    return BadRequest($"Нет пользователя с логином: {login}.Или неверный пароль");
+                }
+                Club? club = db.Clubs.FirstOrDefault(c => c.Id.ToString() == clubId);
+                if (club == null)
+                {
+                    return BadRequest("Нет клуба с таким ID");
+                }
+                club.Users.Add(user);
+                db.SaveChanges();
+                return Ok(user);
+            }
+        }
+        [HttpPost("ExitFromClub")]
+        public IActionResult ExitFromClub(string login, string password, string clubId)
+        {
+
+
+            using (ApplicationContext db = new ApplicationContext())
+            {
+                User? user = db.Users.FirstOrDefault(u => u.Login == login && u.Password == password);
+                if (user == null)
+                {
+                    return BadRequest($"Нет пользователя с логином: {login}.Или неверный пароль");
+                }
+                Club? club = db.Clubs.FirstOrDefault(c => c.Id.ToString() == clubId);
+                if (club == null)
+                {
+                    return BadRequest("Нет клуба с таким ID");
+                }
+                club.Users.Remove(user);
+                db.SaveChanges();
+                return Ok(user);
+            }
+        }
+        [HttpPost("JoinInEvent")]
+        public IActionResult JoinInEvent(string login, string password, string eventId)
+        {
+
+
+            using (ApplicationContext db = new ApplicationContext())
+            {
+                User? user = db.Users.FirstOrDefault(u => u.Login == login && u.Password == password);
+                if (user == null)
+                {
+                    return BadRequest($"Нет пользователя с логином: {login}.Или неверный пароль");
+                }
+                Event? ev = db.Events.FirstOrDefault(e => e.Id.ToString() == eventId);
+                if (ev == null)
+                {
+                    return BadRequest("Нет Ивента с таким ID");
+                }
+                ev.Members.Add(user);
+                db.SaveChanges();
+                return Ok(user);
+            }
+        }
+        [HttpPost("ExitFromEvent")]
+        public IActionResult ExitFromEvent(string login, string password, string eventId)
+        {
+
+
+            using (ApplicationContext db = new ApplicationContext())
+            {
+                User? user = db.Users.FirstOrDefault(u => u.Login == login && u.Password == password);
+                if (user == null)
+                {
+                    return BadRequest($"Нет пользователя с логином: {login}.Или неверный пароль");
+                }
+                Event? ev = db.Events.FirstOrDefault(e => e.Id.ToString() == eventId);
+                if (ev == null)
+                {
+                    return BadRequest("Нет Ивента с таким ID");
+                }
+                ev.Members.Remove(user);
+                db.SaveChanges();
+                return Ok(user);
+            }
+        }
+
+
     }
 }
