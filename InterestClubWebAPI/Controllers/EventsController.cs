@@ -7,6 +7,7 @@ using InterestClubWebAPI.Extensions;
 using InterestClubWebAPI.Models.InterestClubWebAPI.DTOs;
 using static System.Reflection.Metadata.BlobBuilder;
 using InterestClubWebAPI.Repository;
+using Microsoft.AspNetCore.Authorization;
 //using System.Data.Entity;
 
 
@@ -24,6 +25,7 @@ namespace InterestClubWebAPI.Controllers
             _authentication = authentication;
             _db = context;
         }
+        [Authorize]
         [HttpPost("AddEvent")]
         public IActionResult AddEvent(string name, string description, string idUser, string idClub)
         {
@@ -50,6 +52,7 @@ namespace InterestClubWebAPI.Controllers
             var eventDTO = ev.ToDTO();
             return Ok(eventDTO);
         }
+        [Authorize]
         [HttpDelete("DeleteEvent")]
         public IActionResult DeleteEvent(string id)
         {
@@ -71,7 +74,7 @@ namespace InterestClubWebAPI.Controllers
                 return Ok();
             }
         }
-
+        [AllowAnonymous]
         [HttpGet("getEvent")]
         public IActionResult getEvent(string id)
         {
@@ -86,6 +89,7 @@ namespace InterestClubWebAPI.Controllers
                 return Ok(eventDTO);
             }
         }
+        [AllowAnonymous]
         [HttpGet("getAllEvents")]
         public IActionResult getAllEvents(string id)
         {

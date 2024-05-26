@@ -3,6 +3,7 @@ using InterestClubWebAPI.Extensions;
 using InterestClubWebAPI.Models;
 using InterestClubWebAPI.Models.InterestClubWebAPI.DTOs;
 using InterestClubWebAPI.Repository;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -19,7 +20,7 @@ namespace InterestClubWebAPI.Controllers
             _authentication = authentication;
             _db = context;
         }
-
+        [Authorize]
         [HttpPost("CreateClub")]
         public IActionResult CreateClub(string title, string description, string fullDescription, string userId)
         {
@@ -42,7 +43,7 @@ namespace InterestClubWebAPI.Controllers
             var clubDTO = club.ToDTO();
             return Ok(clubDTO);
         }
-
+        [Authorize]
         [HttpDelete("DeleteClub")]
         public IActionResult DeleteClub(string title)
         {
@@ -60,6 +61,7 @@ namespace InterestClubWebAPI.Controllers
             }
         }
 
+        [AllowAnonymous]
         [HttpGet("GetClub")]
         public IActionResult GetClub(string id)
         {
@@ -75,6 +77,7 @@ namespace InterestClubWebAPI.Controllers
                 return Ok(clubDTO);
             }
         }
+        [AllowAnonymous]
         [HttpGet("GetAllClubs")]
         public IActionResult GetAllClubs()
         {

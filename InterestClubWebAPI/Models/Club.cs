@@ -33,10 +33,9 @@ namespace InterestClubWebAPI.Models
             public string? Description { get; set; }
             public string? FullDescription { get; set; }
             public Guid CreatorClubID { get; set; }
-            public List<UserDTO> Users { get; set; }
-            public List<EventDTO> Events { get; set; }
-
             public int CountMembers { get; set; }
+            public List<UserDTO> Users { get; set; }
+            public List<EventDTO> Events { get; set; }           
 
             public ClubDTO()
             {

@@ -35,19 +35,27 @@ namespace InterestClubWebAPI.Controllers
             var password = decodeToken.Claims.First(claim => claim.Type == "password").Value;
             return (login, password);
         }
-
+        public class UserDataRequest
+        {
+            public string Login { get; set; }
+            public string Password { get; set; }
+        }
         [AllowAnonymous]
         [HttpPost("singUp")]
-        public IActionResult SingUp(string login, string password)
+        public IActionResult SingUp([FromBody] UserDataRequest request)
         {
-            if (_db.Users.Any(user => user.Login == login))
+            if (string.IsNullOrEmpty(request.Login) || string.IsNullOrEmpty(request.Password))
+            {
+                return BadRequest("Логин и пароль обязательны");
+            }
+            if (_db.Users.Any(user => user.Login == request.Login))
             {
                 return BadRequest("Такой пользователь уже существует");
             }
             else
             {                
                 
-                User user = new User { Login = login, Password = password };
+                User user = new User { Login = request.Login, Password = request.Password };
                 _db.Users.Add(user);
                 _db.SaveChanges();
                 var userDTO = user.ToDTO();
@@ -68,12 +76,16 @@ namespace InterestClubWebAPI.Controllers
 
         [AllowAnonymous]
         [HttpPost("logIn")]
-        public IActionResult LogIn(string login, string password)
+        public IActionResult LogIn([FromBody] UserDataRequest request)
         {
+            if (string.IsNullOrEmpty(request.Login) || string.IsNullOrEmpty(request.Password))
+            {
+                return BadRequest("Логин и пароль обязательны");
+            }
             var user = _db.Users
                 .Include(u => u.Clubs)
                 .Include(u => u.Events)
-                .FirstOrDefault(u => u.Login == login && u.Password == password);
+                .FirstOrDefault(u => u.Login == request.Login && u.Password == request.Password);
 
             if (user != null)
             {
@@ -125,7 +137,7 @@ namespace InterestClubWebAPI.Controllers
             if (user != null)
             {
                 var userDTO = user.ToDTO();
-                return Ok(userDTO.Role.ToString());
+                return Ok(userDTO);
 
             }
             else
@@ -136,9 +148,11 @@ namespace InterestClubWebAPI.Controllers
 
         [Authorize]
         [HttpDelete("DeleteUser")]
-        public IActionResult DeleteUser(string login, string password)
+        public IActionResult DeleteUser()
         {
-            User? user = _db.Users.FirstOrDefault(u => u.Login == login && u.Password == password);
+            var token = HttpContext.GetTokenAsync("access_token");
+            var userCreditans = getUserCreditansFromJWT(token.Result);
+            User? user = _db.Users.FirstOrDefault(u => u.Login == userCreditans.login && u.Password == userCreditans.password);
             //HttpContext.Response.Headers
             if (user != null)
             {
@@ -154,17 +168,8 @@ namespace InterestClubWebAPI.Controllers
 
         [Authorize(Roles = "admin")]
         [HttpDelete("DeleteUserByAdmin")]
-        public IActionResult DeleteUser(string adminLogin, string adminPassword, string userLogin)
-        {
-            User? adminUser = _db.Users.FirstOrDefault(u => u.Login == adminLogin && u.Password == adminPassword);
-            if (adminUser == null)
-            {
-                return BadRequest($"Нет админа под логином {adminLogin}");
-            }
-            if (adminUser.Role != Enums.Role.admin)
-            {
-                return BadRequest("Нет прав админа");
-            }
+        public IActionResult DeleteUserByAdmin(string userLogin)
+        {            
             User? user = _db.Users.FirstOrDefault(u => u.Login == userLogin);
             if (user != null)
             {
@@ -180,9 +185,11 @@ namespace InterestClubWebAPI.Controllers
         }
         [Authorize]
         [HttpPost("EditUser")]
-        public IActionResult EditUser(string login, string password, string name, string surname, string fatherland)
+        public IActionResult EditUser(string name, string surname, string fatherland)
         {
-            User? user = _db.Users.FirstOrDefault(u => u.Login == login && u.Password == password);
+            var token = HttpContext.GetTokenAsync("access_token");
+            var userCreditans = getUserCreditansFromJWT(token.Result);
+            User? user = _db.Users.FirstOrDefault(u => u.Login == userCreditans.login && u.Password == userCreditans.password);
 
             if (user != null)
             {
@@ -222,12 +229,14 @@ namespace InterestClubWebAPI.Controllers
 
         [Authorize]
         [HttpPost("ExitFromClub")]
-        public IActionResult ExitFromClub(string login, string password, string clubId)
+        public IActionResult ExitFromClub(string clubId)
         {
-            User? user = _db.Users.FirstOrDefault(u => u.Login == login && u.Password == password);
+            var token = HttpContext.GetTokenAsync("access_token");
+            var userCreditans = getUserCreditansFromJWT(token.Result);
+            User? user = _db.Users.FirstOrDefault(u => u.Login == userCreditans.login && u.Password == userCreditans.password);
             if (user == null)
             {
-                return BadRequest($"Нет пользователя с логином: {login}.Или неверный пароль");
+                return BadRequest($"Нет пользователя с логином: {userCreditans.login}.Или неверный пароль");
             }
             Club? club = _db.Clubs.FirstOrDefault(c => c.Id.ToString() == clubId);
             if (club == null)
@@ -241,12 +250,14 @@ namespace InterestClubWebAPI.Controllers
 
         [Authorize]
         [HttpPost("JoinInEvent")]
-        public IActionResult JoinInEvent(string login, string password, string eventId)
+        public IActionResult JoinInEvent(string eventId)
         {
-            User? user = _db.Users.FirstOrDefault(u => u.Login == login && u.Password == password);
+            var token = HttpContext.GetTokenAsync("access_token");
+            var userCreditans = getUserCreditansFromJWT(token.Result);
+            User? user = _db.Users.FirstOrDefault(u => u.Login == userCreditans.login && u.Password == userCreditans.password);
             if (user == null)
             {
-                return BadRequest($"Нет пользователя с логином: {login}.Или неверный пароль");
+                return BadRequest($"Нет пользователя с логином: {userCreditans.login}.Или неверный пароль");
             }
 
             Event? ev = _db.Events.FirstOrDefault(e => e.Id.ToString() == eventId);
@@ -260,12 +271,14 @@ namespace InterestClubWebAPI.Controllers
         }
         [Authorize]
         [HttpPost("ExitFromEvent")]
-        public IActionResult ExitFromEvent(string login, string password, string eventId)
+        public IActionResult ExitFromEvent(string eventId)
         {
-            User? user = _db.Users.FirstOrDefault(u => u.Login == login && u.Password == password);
+            var token = HttpContext.GetTokenAsync("access_token");
+            var userCreditans = getUserCreditansFromJWT(token.Result);
+            User? user = _db.Users.FirstOrDefault(u => u.Login == userCreditans.login && u.Password == userCreditans.password);
             if (user == null)
             {
-                return BadRequest($"Нет пользователя с логином: {login}.Или неверный пароль");
+                return BadRequest($"Нет пользователя с логином: {userCreditans.login}.Или неверный пароль");
             }
             Event? ev = _db.Events.FirstOrDefault(e => e.Id.ToString() == eventId);
             if (ev == null)
