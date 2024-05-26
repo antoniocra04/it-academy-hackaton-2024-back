@@ -14,6 +14,8 @@ namespace InterestClubWebAPI.Models
 
         public Guid CreatorClubID { get; set; }
 
+        public Image? ClubImage { get; set; }
+
         public ICollection<User> Users { get; set; }
         public ICollection<Event> Events { get; set; }
 

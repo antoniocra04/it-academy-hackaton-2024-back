@@ -1,6 +1,7 @@
 using InterestClubWebAPI.Context;
 using InterestClubWebAPI.Repository;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -62,8 +63,11 @@ builder.Services.AddSwaggerGen(options =>
         }
     });
 });
+
+
+
 builder.Services.AddDbContext<ApplicationContext>(options =>
-    options.UseNpgsql("Host=aws-0-eu-central-1.pooler.supabase.com;Port=5432;Database=postgres;Username=postgres.ljhexoykjtmlvbjpriks;Password=Hackaton20052024"));
+    options.UseNpgsql("Host=147.45.158.95;Port=5432;Database=postgres;Username=postgres;Password=postgres"));
 builder.Services.AddScoped<IJWTAuthManager, JWTAuthManager>();
 
 var app = builder.Build();

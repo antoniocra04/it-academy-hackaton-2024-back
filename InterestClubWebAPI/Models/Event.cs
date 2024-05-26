@@ -16,6 +16,8 @@ namespace InterestClubWebAPI.Models
 
         public string EventDate { get; set; }
 
+        public Image? EventImage { get; set; }
+
         public List<User> Members { get; set; }
 
         public Event()

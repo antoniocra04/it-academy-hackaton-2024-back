@@ -8,6 +8,8 @@
         public Guid CreatorEventID { get; set; }
         public Guid ClubID { get; set; }
         public string EventDate { get; set; }
+
+        public string? ImagePath { get; set; }
         public int MembersCount { get; set; }
 
         //public List<UserDTO> Members { get; set; }

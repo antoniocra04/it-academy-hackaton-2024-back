@@ -19,11 +19,13 @@ namespace InterestClubWebAPI.Controllers
     {
         private readonly IJWTAuthManager _authentication;
         private readonly ApplicationContext _db;
+        IWebHostEnvironment _appEnvironment;
 
-        public EventsController(IJWTAuthManager authentication, ApplicationContext context)
+        public EventsController(IJWTAuthManager authentication, ApplicationContext context, IWebHostEnvironment appEnvironment)
         {
             _authentication = authentication;
             _db = context;
+            _appEnvironment = appEnvironment;
         }
         [Authorize]
         [HttpPost("AddEvent")]
@@ -63,6 +65,16 @@ namespace InterestClubWebAPI.Controllers
             }
             else
             {
+                // Путь к папке клуба
+                string eventDirectoryPath = Path.Combine(_appEnvironment.ContentRootPath, "Images", ev.Name);
+
+                // Проверка, существует ли папка
+                if (Directory.Exists(eventDirectoryPath))
+                {
+                    // Удаление папки и ее содержимого
+                    Directory.Delete(eventDirectoryPath, true);
+                }
+
                 _db.Events.Remove(ev);
 
                 //var EventMemberToRemove = _db.EventMembers.Where(em => em.EventId.ToString() == id);
@@ -110,6 +122,58 @@ namespace InterestClubWebAPI.Controllers
             {
                 return BadRequest("Такого Ивента нет :(");
             }
+        }
+        [Authorize]
+        [HttpPost("AddImageInEvent")]
+        public async Task<IActionResult> AddImageInEvent(string eventId)
+        {
+            var uploadedFile = Request.Form.Files.FirstOrDefault();
+            Event? ev = _db.Events.FirstOrDefault(e => e.Id.ToString() == eventId);
+            if (ev == null)
+            {
+                return BadRequest("Такого Ивента нет :(");
+            }
+            if (uploadedFile != null)
+            {
+                // Проверка, является ли файл изображением
+                var permittedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif" };
+                var ext = Path.GetExtension(uploadedFile.FileName).ToLowerInvariant();
+                if (!permittedExtensions.Contains(ext))
+                {
+                    return BadRequest("Файл не является изображением");
+                }
+
+                // Проверка типа содержимого
+                var permittedContentTypes = new[] { "image/jpeg", "image/png", "image/gif" };
+                if (!permittedContentTypes.Contains(uploadedFile.ContentType))
+                {
+                    return BadRequest("Файл не является изображением");
+                }
+
+                // Удаление старого изображения, если оно существует
+                if (ev.EventImage != null)
+                {
+                    string oldImagePath = _appEnvironment.ContentRootPath + ev.EventImage.Path;
+                    if (System.IO.File.Exists(oldImagePath))
+                    {
+                        System.IO.File.Delete(oldImagePath);
+                    }
+                    _db.Images.Remove(ev.EventImage);
+                }
+                // путь к папке Files
+                string path = $"/Images/{ev.Name}/" + uploadedFile.FileName;
+                // сохраняем файл в папку Files в каталоге wwwroot
+                using (var fileStream = new FileStream(_appEnvironment.ContentRootPath + path, FileMode.Create))
+                {
+                    await uploadedFile.CopyToAsync(fileStream);
+                }
+                Image image = new Image { ImageName = uploadedFile.FileName, Path = path };
+                ev.EventImage = image;
+                _db.Images.Add(image);
+                _db.SaveChanges();
+            }
+
+            return Ok("Изображение успешно добавлено");
         }
     }
 }

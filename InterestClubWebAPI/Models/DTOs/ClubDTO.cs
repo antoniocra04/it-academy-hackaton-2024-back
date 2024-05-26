@@ -9,6 +9,7 @@
         public Guid CreatorClubID { get; set; }
         public int CountMembers { get; set; }
         //public List<UserDTO> Users { get; set; }
+        public string? ImagePath { get; set; }
         public List<EventDTO> Events { get; set; }
 
         public List<Discussion> Discussions { get; set; }
