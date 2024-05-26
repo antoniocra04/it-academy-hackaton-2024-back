@@ -36,5 +36,15 @@ namespace InterestClubWebAPI.Repository
             response.message = "Token generated";
             return response;
         }
+        public (string login, string password) getUserCreditansFromJWT(string token)
+        {
+            var handler = new JwtSecurityTokenHandler();
+            var decodeToken = handler.ReadJwtToken(token);
+            var login = decodeToken.Claims.First(claim => claim.Type == "login").Value;
+            var password = decodeToken.Claims.First(claim => claim.Type == "password").Value;
+            return (login, password);
+        }
     }
+
+
 }

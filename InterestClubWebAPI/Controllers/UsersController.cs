@@ -1,15 +1,13 @@
-﻿using Dapper;
-using InterestClubWebAPI.Context;
+﻿using InterestClubWebAPI.Context;
 using InterestClubWebAPI.Extensions;
 using InterestClubWebAPI.Models;
-using InterestClubWebAPI.Models.InterestClubWebAPI.DTOs;
+using InterestClubWebAPI.Models.DTOs;
 using InterestClubWebAPI.Repository;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System;
 using System.IdentityModel.Tokens.Jwt;
 
 
@@ -28,14 +26,14 @@ namespace InterestClubWebAPI.Controllers
             _db = context;
         }
 
-        private (string login, string password) getUserCreditansFromJWT(string token)
-        {
-            var handler = new JwtSecurityTokenHandler();
-            var decodeToken = handler.ReadJwtToken(token);
-            var login = decodeToken.Claims.First(claim => claim.Type == "login").Value;
-            var password = decodeToken.Claims.First(claim => claim.Type == "password").Value;
-            return (login, password);
-        }
+        //private (string login, string password) getUserCreditansFromJWT(string token)
+        //{
+        //    var handler = new JwtSecurityTokenHandler();
+        //    var decodeToken = handler.ReadJwtToken(token);
+        //    var login = decodeToken.Claims.First(claim => claim.Type == "login").Value;
+        //    var password = decodeToken.Claims.First(claim => claim.Type == "password").Value;
+        //    return (login, password);
+        //}
         public class UserDataRequest
         {
             public string Login { get; set; }
@@ -161,7 +159,7 @@ namespace InterestClubWebAPI.Controllers
         public IActionResult DeleteUser()
         {
             var token = HttpContext.GetTokenAsync("access_token");
-            var userCreditans = getUserCreditansFromJWT(token.Result);
+            var userCreditans = _authentication.getUserCreditansFromJWT(token.Result);
             User? user = _db.Users.FirstOrDefault(u => u.Login == userCreditans.login && u.Password == userCreditans.password);
             //HttpContext.Response.Headers
             if (user != null)
@@ -198,7 +196,7 @@ namespace InterestClubWebAPI.Controllers
         public IActionResult EditUser(string name, string surname, string fatherland)
         {
             var token = HttpContext.GetTokenAsync("access_token");
-            var userCreditans = getUserCreditansFromJWT(token.Result);
+            var userCreditans = _authentication.getUserCreditansFromJWT(token.Result);
             User? user = _db.Users.FirstOrDefault(u => u.Login == userCreditans.login && u.Password == userCreditans.password);
 
             if (user != null)
@@ -221,7 +219,7 @@ namespace InterestClubWebAPI.Controllers
         public IActionResult JoinInClub(string clubId)
         {
             var token = HttpContext.GetTokenAsync("access_token");
-            var userCreditans = getUserCreditansFromJWT(token.Result);
+            var userCreditans = _authentication.getUserCreditansFromJWT(token.Result);
             User? user = _db.Users.FirstOrDefault(u => u.Login == userCreditans.login && u.Password == userCreditans.password);
             if (user == null)
             {
@@ -242,7 +240,7 @@ namespace InterestClubWebAPI.Controllers
         public IActionResult ExitFromClub(string clubId)
         {
             var token = HttpContext.GetTokenAsync("access_token");
-            var userCreditans = getUserCreditansFromJWT(token.Result);
+            var userCreditans = _authentication.getUserCreditansFromJWT(token.Result);
             User? user = _db.Users.FirstOrDefault(u => u.Login == userCreditans.login && u.Password == userCreditans.password);
             if (user == null)
             {
@@ -263,7 +261,7 @@ namespace InterestClubWebAPI.Controllers
         public IActionResult JoinInEvent(string eventId)
         {
             var token = HttpContext.GetTokenAsync("access_token");
-            var userCreditans = getUserCreditansFromJWT(token.Result);
+            var userCreditans = _authentication.getUserCreditansFromJWT(token.Result);
             User? user = _db.Users.FirstOrDefault(u => u.Login == userCreditans.login && u.Password == userCreditans.password);
             if (user == null)
             {
@@ -284,7 +282,7 @@ namespace InterestClubWebAPI.Controllers
         public IActionResult ExitFromEvent(string eventId)
         {
             var token = HttpContext.GetTokenAsync("access_token");
-            var userCreditans = getUserCreditansFromJWT(token.Result);
+            var userCreditans = _authentication.getUserCreditansFromJWT(token.Result);
             User? user = _db.Users.FirstOrDefault(u => u.Login == userCreditans.login && u.Password == userCreditans.password);
             if (user == null)
             {
@@ -300,6 +298,25 @@ namespace InterestClubWebAPI.Controllers
             return Ok(user);
 
         }
+
+        [Authorize(Roles = "admin")]
+        [HttpPost("GiveAdminRole")]
+        public IActionResult GiveAdminRole(string userLogin)
+        {
+            User? user = _db.Users.FirstOrDefault(u => u.Login == userLogin);
+            if (user != null)
+            {
+                user.Role = Enums.Role.admin;
+                _db.SaveChanges();
+                return Ok($"Пользователь под логином: {userLogin}, теперь admin");
+            }
+            else
+            {
+                return BadRequest($"Нет пользователя под логином: {userLogin}"); ; ;
+            }
+
+        }
+
     }
 }
 

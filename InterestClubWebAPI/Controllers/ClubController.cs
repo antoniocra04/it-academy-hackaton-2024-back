@@ -1,7 +1,7 @@
 ﻿using InterestClubWebAPI.Context;
 using InterestClubWebAPI.Extensions;
 using InterestClubWebAPI.Models;
-using InterestClubWebAPI.Models.InterestClubWebAPI.DTOs;
+using InterestClubWebAPI.Models.DTOs;
 using InterestClubWebAPI.Repository;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
