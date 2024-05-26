@@ -1,9 +1,6 @@
 using InterestClubWebAPI.Context;
-using InterestClubWebAPI.Enums;
-using InterestClubWebAPI.Models;
 using InterestClubWebAPI.Repository;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Authentication.OAuth;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;

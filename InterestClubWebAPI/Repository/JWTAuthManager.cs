@@ -17,8 +17,9 @@ namespace InterestClubWebAPI.Repository
 
             var claims = new[]
             {
-                new Claim(ClaimTypes.Name, user.Login),
-                new Claim(ClaimTypes.Role, user.Role.ToString()),
+                new Claim("login", user.Login),
+                new Claim("password", user.Password),
+                new Claim("role", user.Role.ToString()),
                 new Claim("Date", DateTime.Now.ToString()),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
             };

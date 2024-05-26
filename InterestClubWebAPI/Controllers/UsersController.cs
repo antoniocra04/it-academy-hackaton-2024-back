@@ -4,20 +4,19 @@ using InterestClubWebAPI.Extensions;
 using InterestClubWebAPI.Models;
 using InterestClubWebAPI.Models.InterestClubWebAPI.DTOs;
 using InterestClubWebAPI.Repository;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System;
+using System.IdentityModel.Tokens.Jwt;
 
 
 namespace InterestClubWebAPI.Controllers
 {
-
     [Route("api/[controller]")]
     [ApiController]
     public class UsersController : Controller
-
-
     {
         private readonly IJWTAuthManager _authentication;
         private readonly ApplicationContext _db;
@@ -26,6 +25,15 @@ namespace InterestClubWebAPI.Controllers
         {
             _authentication = authentication;
             _db = context;
+        }
+
+        private (string login, string password) getUserCreditansFromJWT(string token)
+        {
+            var handler = new JwtSecurityTokenHandler();
+            var decodeToken = handler.ReadJwtToken(token);
+            var login = decodeToken.Claims.First(claim => claim.Type == "login").Value;
+            var password = decodeToken.Claims.First(claim => claim.Type == "password").Value;
+            return (login, password);
         }
 
         [AllowAnonymous]
@@ -44,6 +52,7 @@ namespace InterestClubWebAPI.Controllers
                 _db.SaveChanges();
                 var userDTO = user.ToDTO();
                 var tokenResponse = _authentication.GenerateJWT(user);
+
                 if (tokenResponse.code == 200)
                 {
                     var response = new
@@ -192,12 +201,14 @@ namespace InterestClubWebAPI.Controllers
 
         [Authorize]
         [HttpPost("JoinInClub")]
-        public IActionResult JoinInClub(string login, string password, string clubId)
+        public IActionResult JoinInClub(string clubId)
         {
-            User? user = _db.Users.FirstOrDefault(u => u.Login == login && u.Password == password);
+            var token = HttpContext.GetTokenAsync("access_token");
+            var userCreditans = getUserCreditansFromJWT(token.Result);
+            User? user = _db.Users.FirstOrDefault(u => u.Login == userCreditans.login && u.Password == userCreditans.password);
             if (user == null)
             {
-                return BadRequest($"Нет пользователя с логином: {login}.Или неверный пароль");
+                return BadRequest($"Нет пользователя с логином: {userCreditans.login}.Или неверный пароль");
             }
             Club? club = _db.Clubs.FirstOrDefault(c => c.Id.ToString() == clubId);
             if (club == null)
