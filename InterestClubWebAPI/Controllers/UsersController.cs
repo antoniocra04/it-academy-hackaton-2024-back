@@ -6,6 +6,7 @@ using InterestClubWebAPI.Models.InterestClubWebAPI.DTOs;
 using InterestClubWebAPI.Repository;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -48,14 +49,17 @@ namespace InterestClubWebAPI.Controllers
             {
                 return BadRequest("Логин и пароль обязательны");
             }
+
             if (_db.Users.Any(user => user.Login == request.Login))
             {
                 return BadRequest("Такой пользователь уже существует");
             }
             else
-            {                
-                
-                User user = new User { Login = request.Login, Password = request.Password };
+            {
+                var passwordHasher = new PasswordHasher<User>();
+                User user = new User { Login = request.Login };
+                user.Password = passwordHasher.HashPassword(user, request.Password);
+
                 _db.Users.Add(user);
                 _db.SaveChanges();
                 var userDTO = user.ToDTO();
@@ -70,7 +74,7 @@ namespace InterestClubWebAPI.Controllers
                     };
                     return Ok(response);
                 }
-                return BadRequest(tokenResponse.message);  
+                return BadRequest(tokenResponse.message);
             }
         }
 
@@ -82,25 +86,31 @@ namespace InterestClubWebAPI.Controllers
             {
                 return BadRequest("Логин и пароль обязательны");
             }
+
             var user = _db.Users
                 .Include(u => u.Clubs)
                 .Include(u => u.Events)
-                .FirstOrDefault(u => u.Login == request.Login && u.Password == request.Password);
+                .FirstOrDefault(u => u.Login == request.Login);
 
             if (user != null)
             {
-                var tokenResponse = _authentication.GenerateJWT(user);
-                if (tokenResponse.code == 200)
+                var passwordHasher = new PasswordHasher<User>();
+                var result = passwordHasher.VerifyHashedPassword(user, user.Password, request.Password);
+
+                if (result == PasswordVerificationResult.Success)
                 {
-                    var response = new
+                    var tokenResponse = _authentication.GenerateJWT(user);
+                    if (tokenResponse.code == 200)
                     {
-                        access_token = tokenResponse.Data,
-                        user = user.ToDTO()
-                    };
-                
-                    return Ok(response);
+                        var response = new
+                        {
+                            access_token = tokenResponse.Data,
+                            user = user.ToDTO()
+                        };
+                        return Ok(response);
+                    }
+                    return BadRequest(tokenResponse.message);
                 }
-                return BadRequest(tokenResponse.message);
             }
             return BadRequest("Введен неправильный пароль, либо такого пользователя не существует");
         }
