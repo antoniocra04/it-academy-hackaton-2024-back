@@ -13,7 +13,9 @@ namespace InterestClubWebAPI.Context
 
         public DbSet<Club> Clubs { get; set; }
 
+        public DbSet<Discussion> Discussions { get; set; }
 
+        public DbSet<Comment> Comments { get; set; }
 
         
         public ApplicationContext(DbContextOptions<ApplicationContext> options) : base(options)
@@ -40,8 +42,12 @@ namespace InterestClubWebAPI.Context
             modelBuilder.Entity<User>()
                 .HasMany(u => u.Events)
                 .WithMany(e => e.Members);
-            
-                
+
+            modelBuilder.Entity<Discussion>()
+                .HasMany(d => d.comments)
+                .WithOne()
+                .HasForeignKey(c => c.DiscussionId);
+
             base.OnModelCreating(modelBuilder);
         }
 

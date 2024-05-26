@@ -17,32 +17,16 @@ namespace InterestClubWebAPI.Models
         public ICollection<User> Users { get; set; }
         public ICollection<Event> Events { get; set; }
 
+        public ICollection<Discussion> Discussions { get; set; }
+
         public Club()
         {
             Events = new List<Event>();
             Users = new List<User>();
+            Discussions = new List<Discussion>();
         }
     }
 
-    namespace InterestClubWebAPI.DTOs
-    {
-        public class ClubDTO
-        {
-            public Guid Id { get; set; }
-            public string Title { get; set; }
-            public string? Description { get; set; }
-            public string? FullDescription { get; set; }
-            public Guid CreatorClubID { get; set; }
-            public int CountMembers { get; set; }
-            public List<UserDTO> Users { get; set; }
-            public List<EventDTO> Events { get; set; }           
-
-            public ClubDTO()
-            {
-                Users = new List<UserDTO>();
-                Events = new List<EventDTO>();
-            }
-        }
-    }
+    
 
 }

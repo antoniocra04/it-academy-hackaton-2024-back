@@ -7,5 +7,7 @@ namespace InterestClubWebAPI.Repository
     {
         Response<string> GenerateJWT(User user);
 
+        public (string login, string password) getUserCreditansFromJWT(string token);
+
     }
 }

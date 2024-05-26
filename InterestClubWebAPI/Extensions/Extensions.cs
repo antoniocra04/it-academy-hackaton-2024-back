@@ -1,4 +1,4 @@
-﻿using InterestClubWebAPI.Models.InterestClubWebAPI.DTOs;
+﻿using InterestClubWebAPI.Models.DTOs;
 using InterestClubWebAPI.Models;
 using System;
 using Microsoft.Extensions.Logging;
@@ -18,7 +18,7 @@ namespace InterestClubWebAPI.Extensions
                 FullDescription = club.FullDescription,
                 CreatorClubID = club.CreatorClubID,
                 CountMembers = club.Users.Count(),
-                Users = club.Users.Select(u => u.ToDTO()).ToList(),
+                //Users = club.Users.Select(u => u.ToDTO()).ToList(),
                 Events = club.Events.Select(e => e.ToDTO()).ToList(),                
             };
         }
@@ -67,8 +67,23 @@ namespace InterestClubWebAPI.Extensions
                 ClubID = ev.ClubID,
                 EventDate = ev.EventDate,
                 MembersCount = ev.Members.Count(),
-                Members = ev.Members.Select(m => m.ToDTO()).ToList(),
+                //Members = ev.Members.Select(m => m.ToDTO()).ToList(),
                 
+            };
+        }
+    }
+
+    public static class DiscussionExtensions
+    {
+        public static DiscussionDTO ToDTO(this Discussion discussion)
+        {
+            return new DiscussionDTO
+            {
+                Id = discussion.Id,
+                ClubId = discussion.ClubId,
+                Title = discussion.Title,
+                Description = discussion.Description,
+                FullDescription = discussion.FullDescription,
             };
         }
     }

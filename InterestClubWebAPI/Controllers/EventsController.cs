@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using InterestClubWebAPI.Context;
 using Microsoft.Extensions.Logging;
 using InterestClubWebAPI.Extensions;
-using InterestClubWebAPI.Models.InterestClubWebAPI.DTOs;
+using InterestClubWebAPI.Models.DTOs;
 using static System.Reflection.Metadata.BlobBuilder;
 using InterestClubWebAPI.Repository;
 using Microsoft.AspNetCore.Authorization;
