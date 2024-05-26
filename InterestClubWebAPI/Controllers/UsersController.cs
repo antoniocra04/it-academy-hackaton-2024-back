@@ -232,7 +232,7 @@ namespace InterestClubWebAPI.Controllers
             }
             club.Users.Add(user);
             _db.SaveChanges();
-            return Ok(user);
+            return Ok(clubId);
         }
 
         [Authorize]
@@ -253,7 +253,7 @@ namespace InterestClubWebAPI.Controllers
             }
             club.Users.Remove(user);
             _db.SaveChanges();
-            return Ok(user);
+            return Ok(clubId);
         }
 
         [Authorize]
