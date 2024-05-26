@@ -30,6 +30,8 @@ namespace InterestClubWebAPI.Controllers
                 return BadRequest("Обсуждение с таким название уже созданно у этого клуба");
             }
             Discussion discussion = new Discussion { ClubId = Guid.Parse(clubId), Title = title, Description = description, FullDescription = fullDescription };
+            _db.Discussions.Add(discussion);
+            _db.SaveChanges();
             return Ok(discussion.ToDTO());
         }
         [AllowAnonymous]
@@ -95,6 +97,7 @@ namespace InterestClubWebAPI.Controllers
 
             Comment comment = new Comment { UserId = user.Id, LogginUser = user.Login, DiscussionId = Guid.Parse(discussionsId), Commentariy = commentariy };
             discussion.comments.Add(comment);
+            _db.Comments.Add(comment);
             _db.SaveChanges();
             return Ok("Коментарий успешно добавлен");
         }
