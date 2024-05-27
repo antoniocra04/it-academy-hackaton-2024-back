@@ -12,13 +12,13 @@
         public string? ImagePath { get; set; }
         public List<EventDTO> Events { get; set; }
 
-        public List<Discussion> Discussions { get; set; }
+        public List<DiscussionDTO> Discussions { get; set; }
 
         public ClubDTO()
         {
             //Users = new List<UserDTO>();
             Events = new List<EventDTO>();
-            Discussions = new List<Discussion>();
+            Discussions = new List<DiscussionDTO>();
         }
     }
 }

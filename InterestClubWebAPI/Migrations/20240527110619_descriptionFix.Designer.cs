@@ -3,6 +3,7 @@ using System;
 using InterestClubWebAPI.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace InterestClubWebAPI.Migrations
 {
     [DbContext(typeof(ApplicationContext))]
-    partial class ApplicationContextModelSnapshot : ModelSnapshot
+    [Migration("20240527110619_descriptionFix")]
+    partial class descriptionFix
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -58,9 +61,6 @@ namespace InterestClubWebAPI.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<Guid?>("ClubImageId")
-                        .HasColumnType("uuid");
-
                     b.Property<Guid>("CreatorClubID")
                         .HasColumnType("uuid");
 
@@ -75,8 +75,6 @@ namespace InterestClubWebAPI.Migrations
                         .HasColumnType("text");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("ClubImageId");
 
                     b.ToTable("Clubs");
                 });
@@ -158,12 +156,8 @@ namespace InterestClubWebAPI.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-
-                    b.Property<Guid?>("EventImageId")
-                        .HasColumnType("uuid");
                     b.Property<string>("FullDescription")
                         .HasColumnType("text");
-
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -173,28 +167,7 @@ namespace InterestClubWebAPI.Migrations
 
                     b.HasIndex("ClubID");
 
-                    b.HasIndex("EventImageId");
-
                     b.ToTable("Events");
-                });
-
-            modelBuilder.Entity("InterestClubWebAPI.Models.Image", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("ImageName")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("Path")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Images");
                 });
 
             modelBuilder.Entity("InterestClubWebAPI.Models.User", b =>
@@ -258,15 +231,6 @@ namespace InterestClubWebAPI.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("InterestClubWebAPI.Models.Club", b =>
-                {
-                    b.HasOne("InterestClubWebAPI.Models.Image", "ClubImage")
-                        .WithMany()
-                        .HasForeignKey("ClubImageId");
-
-                    b.Navigation("ClubImage");
-                });
-
             modelBuilder.Entity("InterestClubWebAPI.Models.Comment", b =>
                 {
                     b.HasOne("InterestClubWebAPI.Models.Discussion", null)
@@ -292,12 +256,6 @@ namespace InterestClubWebAPI.Migrations
                         .HasForeignKey("ClubID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.HasOne("InterestClubWebAPI.Models.Image", "EventImage")
-                        .WithMany()
-                        .HasForeignKey("EventImageId");
-
-                    b.Navigation("EventImage");
                 });
 
             modelBuilder.Entity("InterestClubWebAPI.Models.Club", b =>

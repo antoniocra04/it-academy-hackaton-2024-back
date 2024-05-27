@@ -21,7 +21,8 @@ namespace InterestClubWebAPI.Extensions
                 CountMembers = club.Users.Count(),
                 ImagePath = club.ClubImage != null ? club.ClubImage.Path : null,
                 //Users = club.Users.Select(u => u.ToDTO()).ToList(),
-                Events = club.Events.Select(e => e.ToDTO()).ToList(),                
+                Events = club.Events.Select(e => e.ToDTO()).ToList(),        
+                Discussions = club.Discussions.Select(d => d.ToDTO()).ToList(),
             };
         }
     }
@@ -65,6 +66,7 @@ namespace InterestClubWebAPI.Extensions
                 Id = ev.Id,
                 Name = ev.Name,
                 Description = ev.Description,
+                FullDescription = ev.FullDescription,
                 CreatorEventID = ev.CreatorEventID,
                 ClubID = ev.ClubID,
                 EventDate = ev.EventDate,
@@ -84,6 +86,7 @@ namespace InterestClubWebAPI.Extensions
             {
                 Id = discussion.Id,
                 ClubId = discussion.ClubId,
+                CreatorId = discussion.CreatorId,
                 Title = discussion.Title,
                 Description = discussion.Description,
                 FullDescription = discussion.FullDescription,

@@ -45,10 +45,10 @@ namespace InterestClubWebAPI.Context
                 .HasMany(u => u.Events)
                 .WithMany(e => e.Members);
 
-            modelBuilder.Entity<Discussion>()
-                .HasMany(d => d.comments)
-                .WithOne()
-                .HasForeignKey(c => c.DiscussionId);
+            //modelBuilder.Entity<Discussion>()
+            //    .HasMany(d => d.comments)
+            //    .WithOne()
+            //    .HasForeignKey(c => c.DiscussionId);
 
             base.OnModelCreating(modelBuilder);
         }

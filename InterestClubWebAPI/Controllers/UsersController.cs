@@ -116,7 +116,7 @@ namespace InterestClubWebAPI.Controllers
         [HttpGet("GetUsers")]//Добавить проверку на админа
         public IActionResult GetUsers()
         {
-            var users = _db.Users.ToList();
+            var users = _db.Users.Include(u => u.Clubs).Include(u => u.Events).ToList();
             if (users.Any())
             {
                 List<UserDTO> userDTOs = new List<UserDTO>();
@@ -225,14 +225,18 @@ namespace InterestClubWebAPI.Controllers
             {
                 return BadRequest($"Нет пользователя с логином: {userCreditans.login}.Или неверный пароль");
             }
-            Club? club = _db.Clubs.FirstOrDefault(c => c.Id.ToString() == clubId);
+            Club? club = _db.Clubs.Include(c => c.Users).FirstOrDefault(c => c.Id.ToString() == clubId);
             if (club == null)
             {
                 return BadRequest("Нет клуба с таким ID");
             }
+            if(club.Users.Any(u=> u.Id == user.Id))
+            {
+                return BadRequest("Пользователь уже в клубе");
+            }
             club.Users.Add(user);
             _db.SaveChanges();
-            return Ok(user);
+            return Ok(clubId);
         }
 
         [Authorize]
@@ -246,14 +250,20 @@ namespace InterestClubWebAPI.Controllers
             {
                 return BadRequest($"Нет пользователя с логином: {userCreditans.login}.Или неверный пароль");
             }
-            Club? club = _db.Clubs.FirstOrDefault(c => c.Id.ToString() == clubId);
+            Club? club = _db.Clubs.Include(c => c.Users).FirstOrDefault(c => c.Id.ToString() == clubId);
             if (club == null)
             {
                 return BadRequest("Нет клуба с таким ID");
             }
+            //if (club.CreatorClubID == user.Id )
+            //{
+            //    _db.Clubs.Remove(club);
+            //    _db.SaveChanges();
+            //    return Ok("Вы вышли из клуба и тем самым удалили его ");
+            //}
             club.Users.Remove(user);
             _db.SaveChanges();
-            return Ok(user);
+            return Ok(clubId);
         }
 
         [Authorize]
@@ -268,14 +278,18 @@ namespace InterestClubWebAPI.Controllers
                 return BadRequest($"Нет пользователя с логином: {userCreditans.login}.Или неверный пароль");
             }
 
-            Event? ev = _db.Events.FirstOrDefault(e => e.Id.ToString() == eventId);
+            Event? ev = _db.Events.Include(e => e.Members).FirstOrDefault(e => e.Id.ToString() == eventId);
             if (ev == null)
             {
                 return BadRequest("Нет Ивента с таким ID");
             }
+            if (ev.Members.Any(e => e.Id == user.Id))
+            {
+                return BadRequest("Пользователь уже в Ивенте");
+            }
             ev.Members.Add(user);
             _db.SaveChanges();
-            return Ok(user);
+            return Ok(eventId);
         }
         [Authorize]
         [HttpPost("ExitFromEvent")]
@@ -288,14 +302,14 @@ namespace InterestClubWebAPI.Controllers
             {
                 return BadRequest($"Нет пользователя с логином: {userCreditans.login}.Или неверный пароль");
             }
-            Event? ev = _db.Events.FirstOrDefault(e => e.Id.ToString() == eventId);
+            Event? ev = _db.Events.Include(e => e.Members).FirstOrDefault(e => e.Id.ToString() == eventId);
             if (ev == null)
             {
                 return BadRequest("Нет Ивента с таким ID");
             }
             ev.Members.Remove(user);
             _db.SaveChanges();
-            return Ok(user);
+            return Ok(eventId);
 
         }
 

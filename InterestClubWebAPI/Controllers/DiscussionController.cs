@@ -7,6 +7,7 @@ using InterestClubWebAPI.Extensions;
 using InterestClubWebAPI.Models.DTOs;
 using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Authentication;
+using System.Data.Entity;
 
 namespace InterestClubWebAPI.Controllers
 {
@@ -25,11 +26,17 @@ namespace InterestClubWebAPI.Controllers
         [HttpPost("CreateDiscussion")]
         public IActionResult CreateDiscussion(string clubId, string title, string description, string fullDescription)
         {
+            Club? club = _db.Clubs.Include(c => c.Discussions).FirstOrDefault(c => c.Id.ToString() == clubId);
+            if (club == null)
+            {
+                return BadRequest("Нет такого клуба");
+            }
             if (_db.Discussions.Any(d => d.Title == title && d.ClubId.ToString() == clubId))
             {
                 return BadRequest("Обсуждение с таким название уже созданно у этого клуба");
-            }
-            Discussion discussion = new Discussion { ClubId = Guid.Parse(clubId), Title = title, Description = description, FullDescription = fullDescription };
+            }            
+            Discussion discussion = new Discussion { ClubId = Guid.Parse(clubId),CreatorId = club.CreatorClubID ,Title = title, Description = description, FullDescription = fullDescription };
+            club.Discussions.Add(discussion);
             _db.Discussions.Add(discussion);
             _db.SaveChanges();
             return Ok(discussion.ToDTO());
@@ -38,7 +45,8 @@ namespace InterestClubWebAPI.Controllers
         [HttpGet("GetDiscussionById")]
         public IActionResult GetDiscussionById(string discussionsId)
         {
-            Discussion? discussion = _db.Discussions.FirstOrDefault(d => d.Id.ToString() == discussionsId);
+            List<Comment> comments = _db.Comments.Where(c => c.DiscussionId.ToString() == discussionsId).ToList();
+            Discussion? discussion = _db.Discussions.Include(d => d.comments).FirstOrDefault(d => d.Id.ToString() == discussionsId);
             if (discussion == null)
             {
                 return BadRequest("Обсуждение с таким id не сущетвует");
@@ -82,7 +90,7 @@ namespace InterestClubWebAPI.Controllers
         [HttpPost("CreateComment")]
         public IActionResult CreateComment(string discussionsId, string commentariy)
         {
-            Discussion? discussion = _db.Discussions.FirstOrDefault(d => d.Id.ToString() == discussionsId);
+            Discussion? discussion = _db.Discussions.Include(d => d.comments).FirstOrDefault(d => d.Id.ToString() == discussionsId);
             if (discussion == null)
             {
                 return BadRequest("Обсуждение с таким id не сущетвует");
@@ -100,6 +108,35 @@ namespace InterestClubWebAPI.Controllers
             _db.Comments.Add(comment);
             _db.SaveChanges();
             return Ok("Коментарий успешно добавлен");
+        }
+        [Authorize]
+        [HttpPost("EditDiscussion")]
+        public IActionResult EditUser(string discussionId, string title, string description, string fullDescription)
+        {
+            var token = HttpContext.GetTokenAsync("access_token");
+            var userCreditans = _authentication.getUserCreditansFromJWT(token.Result);
+            User? user = _db.Users.FirstOrDefault(u => u.Login == userCreditans.login && u.Password == userCreditans.password);
+            if (user == null)
+            {
+                return BadRequest("Нет такого пользователя от которого идет запрос :(");
+            }
+            Discussion? discussion = _db.Discussions.FirstOrDefault(d => d.Id.ToString() == discussionId);
+            if (discussion == null)
+            {
+                return BadRequest("Нет такого Обсуждения  :(");
+            }
+            if (discussion.CreatorId == user.Id || user.Role == Enums.Role.admin)
+            {
+                discussion.Title = title;
+                discussion.Description = description;
+                discussion.FullDescription = fullDescription;
+                _db.SaveChanges();
+                return Ok("Клуб успешно изменен");
+            }
+            else
+            {
+                return BadRequest("Нет прав для изменения клуба :(");
+            }
         }
 
     }

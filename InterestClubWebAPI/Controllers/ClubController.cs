@@ -3,10 +3,12 @@ using InterestClubWebAPI.Extensions;
 using InterestClubWebAPI.Models;
 using InterestClubWebAPI.Models.DTOs;
 using InterestClubWebAPI.Repository;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Xml.Linq;
 
 using System.IO;
 using System.Threading;
@@ -51,9 +53,10 @@ namespace InterestClubWebAPI.Controllers
         }
         [Authorize]
         [HttpDelete("DeleteClub")]
-        public IActionResult DeleteClub(string title)
+        public IActionResult DeleteClub(string id)
         {
-            Club? club = _db.Clubs.FirstOrDefault(club => club.Title == title);
+            Club? club = _db.Clubs.FirstOrDefault(club => club.Id.ToString() == id);
+
             if (club != null)
             {
                 // Путь к папке клуба
@@ -73,7 +76,7 @@ namespace InterestClubWebAPI.Controllers
             }
             else
             {
-                return BadRequest("Нет клуба с таким названием");
+                return BadRequest("Нет клуба с таким ID");
             }
         }
 
@@ -83,7 +86,7 @@ namespace InterestClubWebAPI.Controllers
         public IActionResult GetClub(string id)
         {
 
-            Club? club = _db.Clubs.Include(c => c.Users).Include(c => c.Events).FirstOrDefault(club => club.Id.ToString() == id);
+            Club? club = _db.Clubs.Include(c => c.Users).Include(c => c.Events).Include(c => c.Discussions).FirstOrDefault(club => club.Id.ToString() == id);
             if (club == null)
             {
                 return BadRequest("Такого Клуба нет :(");
@@ -98,7 +101,7 @@ namespace InterestClubWebAPI.Controllers
         [HttpGet("GetAllClubs")]
         public IActionResult GetAllClubs()
         {
-            var clubs = _db.Clubs.Include(c => c.Users).Include(c => c.Events).ToList();
+            var clubs = _db.Clubs.Include(c => c.Users).Include(c => c.Events).Include(c => c.Discussions).ToList();
 
             if (clubs.Any())
             {
@@ -117,7 +120,6 @@ namespace InterestClubWebAPI.Controllers
                 return BadRequest("Такого Клуба нет :(");
             }
         }
-
 
         [Authorize]
         [HttpPost("AddImageInClub")]
@@ -178,6 +180,37 @@ namespace InterestClubWebAPI.Controllers
             }
 
             return Ok("Изображение успешно добавлено");
+        }
+
+        [Authorize]
+        [HttpPost("EditClub")]
+        public IActionResult EditUser(string clubId,string title, string description, string fullDescription)
+        {
+            var token = HttpContext.GetTokenAsync("access_token");
+            var userCreditans = _authentication.getUserCreditansFromJWT(token.Result);
+            User? user = _db.Users.FirstOrDefault(u => u.Login == userCreditans.login && u.Password == userCreditans.password);
+            if(user == null)
+            {
+                return BadRequest("Нет такого пользователя от которого идет запрос :(");
+            }
+            Club? club = _db.Clubs.FirstOrDefault(c => c.Id.ToString()== clubId);
+            if(club == null)
+            {
+                return BadRequest("Нет такого клуба :(");
+            }
+            if(club.CreatorClubID == user.Id || user.Role == Enums.Role.admin) 
+            {
+                club.Title = title;
+                club.Description = description;
+                club.FullDescription = fullDescription;
+                _db.SaveChanges();                
+                return Ok("Клуб успешно изменен");
+            }
+            else
+            {
+                return BadRequest("Нет прав для изменения клуба :(");
+            }            
+
         }
     }
 }

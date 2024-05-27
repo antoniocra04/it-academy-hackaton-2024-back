@@ -8,6 +8,7 @@ using InterestClubWebAPI.Models.DTOs;
 using static System.Reflection.Metadata.BlobBuilder;
 using InterestClubWebAPI.Repository;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authentication;
 //using System.Data.Entity;
 
 
@@ -29,7 +30,7 @@ namespace InterestClubWebAPI.Controllers
         }
         [Authorize]
         [HttpPost("AddEvent")]
-        public IActionResult AddEvent(string name, string description, string idUser, string idClub)
+        public IActionResult AddEvent(string name, string description, string fullDescription, string idUser, string idClub)
         {
             if (_db.Events.Any(e => e.Name == name))
             {
@@ -45,7 +46,7 @@ namespace InterestClubWebAPI.Controllers
             }
 
             var eventDate = DateTime.Now;
-            var ev = new Event { Name = name, Description = description, EventDate = eventDate.ToString() };//
+            var ev = new Event { Name = name, Description = description, FullDescription = fullDescription, EventDate = eventDate.ToString() };//
             ev.CreatorEventID = user.Id;
             ev.ClubID = club.Id;
             ev.Members.Add(user);
@@ -65,13 +66,13 @@ namespace InterestClubWebAPI.Controllers
             }
             else
             {
-                // Путь к папке клуба
+                // ГЏГіГІГј ГЄ ГЇГ ГЇГЄГҐ ГЄГ«ГіГЎГ 
                 string eventDirectoryPath = Path.Combine(_appEnvironment.ContentRootPath, "Images", ev.Name);
 
-                // Проверка, существует ли папка
+                // ГЏГ°Г®ГўГҐГ°ГЄГ , Г±ГіГ№ГҐГ±ГІГўГіГҐГІ Г«ГЁ ГЇГ ГЇГЄГ 
                 if (Directory.Exists(eventDirectoryPath))
                 {
-                    // Удаление папки и ее содержимого
+                    // Г“Г¤Г Г«ГҐГ­ГЁГҐ ГЇГ ГЇГЄГЁ ГЁ ГҐГҐ Г±Г®Г¤ГҐГ°Г¦ГЁГ¬Г®ГЈГ®
                     Directory.Delete(eventDirectoryPath, true);
                 }
 
@@ -93,7 +94,7 @@ namespace InterestClubWebAPI.Controllers
             Event? ev = _db.Events.Include(e => e.Members).FirstOrDefault(e => e.Id.ToString() == id);
             if (ev == null)
             {
-                return BadRequest("Такого Ивента нет :(");
+                return BadRequest("Г’Г ГЄГ®ГЈГ® Г€ГўГҐГ­ГІГ  Г­ГҐГІ :(");
             }
             else
             {
@@ -120,7 +121,7 @@ namespace InterestClubWebAPI.Controllers
             }
             else
             {
-                return BadRequest("Такого Ивента нет :(");
+                return BadRequest("Г’Г ГЄГ®ГЈГ® Г€ГўГҐГ­ГІГ  Г­ГҐГІ :(");
             }
         }
         [Authorize]
@@ -131,26 +132,26 @@ namespace InterestClubWebAPI.Controllers
             Event? ev = _db.Events.FirstOrDefault(e => e.Id.ToString() == eventId);
             if (ev == null)
             {
-                return BadRequest("Такого Ивента нет :(");
+                return BadRequest("Г’Г ГЄГ®ГЈГ® Г€ГўГҐГ­ГІГ  Г­ГҐГІ :(");
             }
             if (uploadedFile != null)
             {
-                // Проверка, является ли файл изображением
+                // ГЏГ°Г®ГўГҐГ°ГЄГ , ГїГўГ«ГїГҐГІГ±Гї Г«ГЁ ГґГ Г©Г« ГЁГ§Г®ГЎГ°Г Г¦ГҐГ­ГЁГҐГ¬
                 var permittedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif" };
                 var ext = Path.GetExtension(uploadedFile.FileName).ToLowerInvariant();
                 if (!permittedExtensions.Contains(ext))
                 {
-                    return BadRequest("Файл не является изображением");
+                    return BadRequest("Г”Г Г©Г« Г­ГҐ ГїГўГ«ГїГҐГІГ±Гї ГЁГ§Г®ГЎГ°Г Г¦ГҐГ­ГЁГҐГ¬");
                 }
 
-                // Проверка типа содержимого
+                // ГЏГ°Г®ГўГҐГ°ГЄГ  ГІГЁГЇГ  Г±Г®Г¤ГҐГ°Г¦ГЁГ¬Г®ГЈГ®
                 var permittedContentTypes = new[] { "image/jpeg", "image/png", "image/gif" };
                 if (!permittedContentTypes.Contains(uploadedFile.ContentType))
                 {
-                    return BadRequest("Файл не является изображением");
+                    return BadRequest("Г”Г Г©Г« Г­ГҐ ГїГўГ«ГїГҐГІГ±Гї ГЁГ§Г®ГЎГ°Г Г¦ГҐГ­ГЁГҐГ¬");
                 }
 
-                // Удаление старого изображения, если оно существует
+                // Г“Г¤Г Г«ГҐГ­ГЁГҐ Г±ГІГ Г°Г®ГЈГ® ГЁГ§Г®ГЎГ°Г Г¦ГҐГ­ГЁГї, ГҐГ±Г«ГЁ Г®Г­Г® Г±ГіГ№ГҐГ±ГІГўГіГҐГІ
                 if (ev.EventImage != null)
                 {
                     string oldImagePath = _appEnvironment.ContentRootPath + ev.EventImage.Path;
@@ -160,9 +161,9 @@ namespace InterestClubWebAPI.Controllers
                     }
                     _db.Images.Remove(ev.EventImage);
                 }
-                // путь к папке Files
+                // ГЇГіГІГј ГЄ ГЇГ ГЇГЄГҐ Files
                 string path = $"/Images/{ev.Name}/" + uploadedFile.FileName;
-                // сохраняем файл в папку Files в каталоге wwwroot
+                // Г±Г®ГµГ°Г Г­ГїГҐГ¬ ГґГ Г©Г« Гў ГЇГ ГЇГЄГі Files Гў ГЄГ ГІГ Г«Г®ГЈГҐ wwwroot
                 using (var fileStream = new FileStream(_appEnvironment.ContentRootPath + path, FileMode.Create))
                 {
                     await uploadedFile.CopyToAsync(fileStream);
@@ -173,7 +174,38 @@ namespace InterestClubWebAPI.Controllers
                 _db.SaveChanges();
             }
 
-            return Ok("Изображение успешно добавлено");
+            return Ok("Г€Г§Г®ГЎГ°Г Г¦ГҐГ­ГЁГҐ ГіГ±ГЇГҐГёГ­Г® Г¤Г®ГЎГ ГўГ«ГҐГ­Г®");
+        }
+        
+        [Authorize]
+        [HttpPost("EditEvent")]
+        public IActionResult EditUser(string eventId, string name, string description,string fullDescription)
+        {
+            var token = HttpContext.GetTokenAsync("access_token");
+            var userCreditans = _authentication.getUserCreditansFromJWT(token.Result);
+            User? user = _db.Users.FirstOrDefault(u => u.Login == userCreditans.login && u.Password == userCreditans.password);
+            if (user == null)
+            {
+                return BadRequest("ГЌГҐГІ ГІГ ГЄГ®ГЈГ® ГЇГ®Г«ГјГ§Г®ГўГ ГІГҐГ«Гї Г®ГІ ГЄГ®ГІГ®Г°Г®ГЈГ® ГЁГ¤ГҐГІ Г§Г ГЇГ°Г®Г± :(");
+            }
+            Event? ev = _db.Events.FirstOrDefault(e => e.Id.ToString() == eventId);
+            if (ev == null)
+            {
+                return BadRequest("ГЌГҐГІ ГІГ ГЄГ®ГЈГ® Г€ГўГҐГ­ГІГ  :(");
+            }
+            if (ev.CreatorEventID == user.Id || user.Role == Enums.Role.admin)
+            {
+                ev.Name = name;
+                ev.Description = description;     
+                ev.FullDescription = fullDescription;
+                _db.SaveChanges();
+                return Ok("ГЉГ«ГіГЎ ГіГ±ГЇГҐГёГ­Г® ГЁГ§Г¬ГҐГ­ГҐГ­");
+            }
+            else
+            {
+                return BadRequest("ГЌГҐГІ ГЇГ°Г Гў Г¤Г«Гї ГЁГ§Г¬ГҐГ­ГҐГ­ГЁГї ГЄГ«ГіГЎГ  :(");
+            }
+
         }
     }
 }
