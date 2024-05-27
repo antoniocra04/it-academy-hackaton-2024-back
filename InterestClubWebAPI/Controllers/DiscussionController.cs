@@ -89,7 +89,7 @@ namespace InterestClubWebAPI.Controllers
         [HttpPost("CreateComment")]
         public IActionResult CreateComment(string discussionsId, string commentariy)
         {
-            Discussion? discussion = _db.Discussions.FirstOrDefault(d => d.Id.ToString() == discussionsId);
+            Discussion? discussion = _db.Discussions.Include(d => d.comments).FirstOrDefault(d => d.Id.ToString() == discussionsId);
             if (discussion == null)
             {
                 return BadRequest("Обсуждение с таким id не сущетвует");
