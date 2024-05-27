@@ -289,7 +289,7 @@ namespace InterestClubWebAPI.Controllers
             }
             ev.Members.Add(user);
             _db.SaveChanges();
-            return Ok(user.ToDTO());
+            return Ok(eventId);
         }
         [Authorize]
         [HttpPost("ExitFromEvent")]
@@ -309,7 +309,7 @@ namespace InterestClubWebAPI.Controllers
             }
             ev.Members.Remove(user);
             _db.SaveChanges();
-            return Ok(user.ToDTO());
+            return Ok(eventId);
 
         }
 
