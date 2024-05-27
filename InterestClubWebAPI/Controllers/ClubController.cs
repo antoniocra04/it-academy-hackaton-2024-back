@@ -115,7 +115,7 @@ namespace InterestClubWebAPI.Controllers
         public IActionResult GetClub(string id)
         {
 
-            Club? club = _db.Clubs.Include(c => c.Users).Include(c => c.Events).Include(c => c.Discussions).FirstOrDefault(club => club.Id.ToString() == id);
+            Club? club = _db.Clubs.Include(c => c.Users).Include(c => c.Events).Include(c => c.Discussions).Include(c => c.ClubImage).FirstOrDefault(club => club.Id.ToString() == id);
             if (club == null)
             {
                 return BadRequest("Такого Клуба нет :(");
@@ -179,10 +179,14 @@ namespace InterestClubWebAPI.Controllers
                     // Удаление старого изображения, если оно существует
                     if (club.ClubImage != null)
                     {
-                        string oldImagePath = _appEnvironment.ContentRootPath + club.ClubImage.Path;
-                        if (System.IO.File.Exists(oldImagePath))
+                        // Путь к папке клуба
+                        string oldImagePath = Path.Combine(_appEnvironment.ContentRootPath, "MyStaticFiles\\Clubs", club.Title);
+
+                        // Проверка, существует ли папка
+                        if (Directory.Exists(oldImagePath))
                         {
-                            System.IO.File.Delete(oldImagePath);
+                            // Удаление папки и ее содержимого
+                            Directory.Delete(oldImagePath, true);
                         }
                         _db.Images.Remove(club.ClubImage);
                     }
@@ -193,7 +197,11 @@ namespace InterestClubWebAPI.Controllers
                         return BadRequest(rezult);
                     }
                 }
-                _db.SaveChanges();                
+                string imageUrl = Url.Content("~/StaticFiles/Clubs/" + club.Title + "/" + file.FileName);
+                Image image = new Image { ImageName = file.FileName, Path = imageUrl };
+                club.ClubImage = image;
+                _db.Images.Add(image);
+                _db.SaveChanges();                              
                 return Ok("Клуб успешно изменен");
             }
             else

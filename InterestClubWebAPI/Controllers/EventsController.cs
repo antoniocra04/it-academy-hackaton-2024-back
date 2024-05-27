@@ -179,11 +179,15 @@ namespace InterestClubWebAPI.Controllers
                     // Удаление старого изображения, если оно существует
                     if (ev.EventImage != null)
                     {
-                        string oldImagePath = _appEnvironment.ContentRootPath + ev.EventImage.Path;
-                        if (System.IO.File.Exists(oldImagePath))
+                        // Путь к папке клуба
+                        string oldImagePath = Path.Combine(_appEnvironment.ContentRootPath, "MyStaticFiles\\Events", ev.Name);
+
+                        // Проверка, существует ли папка
+                        if (Directory.Exists(oldImagePath))
                         {
-                            System.IO.File.Delete(oldImagePath);
-                        }
+                            // Удаление папки и ее содержимого
+                            Directory.Delete(oldImagePath, true);
+                        }                        
                         _db.Images.Remove(ev.EventImage);
                     }
                     string rezult;
@@ -193,6 +197,11 @@ namespace InterestClubWebAPI.Controllers
                         return BadRequest(rezult);
                     }
                 }
+                string imageUrl = Url.Content("~/StaticFiles/Events/" + ev.Name + "/" + file.FileName);
+                Image image = new Image { ImageName = file.FileName, Path = imageUrl };
+                ev.EventImage = image;
+                _db.Images.Add(image);
+                _db.SaveChanges();
                 return Ok("Êëóá óñïåøíî èçìåíåí");
             }
             else
