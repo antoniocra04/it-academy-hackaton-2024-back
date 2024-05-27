@@ -67,7 +67,7 @@ builder.Services.AddSwaggerGen(options =>
 
 
 builder.Services.AddDbContext<ApplicationContext>(options =>
-    options.UseNpgsql("Host=147.45.158.95;Port=5432;Database=postgres;Username=postgres;Password=postgres"));
+    options.UseNpgsql("Host=aws-0-eu-central-1.pooler.supabase.com;Port=5432;Database=postgres;Username=postgres.ljhexoykjtmlvbjpriks;Password=Hackaton20052024"));
 builder.Services.AddScoped<IJWTAuthManager, JWTAuthManager>();
 
 var app = builder.Build();
