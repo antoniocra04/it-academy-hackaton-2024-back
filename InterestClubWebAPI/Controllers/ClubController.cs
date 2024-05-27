@@ -48,11 +48,65 @@ namespace InterestClubWebAPI.Controllers
             club.Users.Add(user);
             _db.Clubs.Add(club);
             _db.SaveChanges();
-            if(Request.Form.Files.FirstOrDefault()  != null)
+            var uploadedFile = Request.Form.Files.FirstOrDefault();
+            if (uploadedFile != null)
             {
                 try
-                {
-                    await AddImageInClub(club.Id.ToString());
+                {                   
+                    //Club? club = _db.Clubs.FirstOrDefault(club => club.Id.ToString() == ClubId);
+                    if (club == null)
+                    {
+                        return BadRequest("Такого Клуба нет :(");
+                    }
+                    if (uploadedFile != null)
+                    {
+                        // Проверка, является ли файл изображением
+                        var permittedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif" };
+                        var ext = Path.GetExtension(uploadedFile.FileName).ToLowerInvariant();
+                        if (!permittedExtensions.Contains(ext))
+                        {
+                            return BadRequest("Файл не является изображением");
+                        }
+
+                        // Проверка типа содержимого
+                        var permittedContentTypes = new[] { "image/jpeg", "image/png", "image/gif" };
+                        if (!permittedContentTypes.Contains(uploadedFile.ContentType))
+                        {
+                            return BadRequest("Файл не является изображением");
+                        }
+                        //// путь к папке Files
+                        //string folderPath = Path.Combine(_appEnvironment.WebRootPath, "Files", club.Title);
+                        //string filePath = Path.Combine(folderPath, uploadedFile.FileName);
+                        //// Создание папки, если она не существует
+                        //if (!Directory.Exists(folderPath))
+                        //{
+                        //    Directory.CreateDirectory(folderPath);
+                        //}
+
+                        // Удаление старого изображения, если оно существует
+                        if (club.ClubImage != null)
+                        {
+                            string oldImagePath = _appEnvironment.ContentRootPath + club.ClubImage.Path;
+                            if (System.IO.File.Exists(oldImagePath))
+                            {
+                                System.IO.File.Delete(oldImagePath);
+                            }
+                            _db.Images.Remove(club.ClubImage);
+                        }
+                        // путь к папке Files
+                        string path = $"/Images/{club.Title}/" + uploadedFile.FileName;
+                        // сохраняем файл в папку Files в каталоге wwwroot
+                        using (var fileStream = new FileStream(_appEnvironment.ContentRootPath + path, FileMode.Create))
+                        {
+                            await uploadedFile.CopyToAsync(fileStream);
+                        }
+                        Image image = new Image { ImageName = uploadedFile.FileName, Path = path };
+                        club.ClubImage = image;
+                        _db.Images.Add(image);
+                        _db.SaveChanges();
+                    }
+
+                    return Ok("Изображение успешно добавлено");
                 }
                 catch (Exception ex)
                 {
@@ -133,65 +187,7 @@ namespace InterestClubWebAPI.Controllers
                 return BadRequest("Такого Клуба нет :(");
             }
         }
-
-        public async Task<IActionResult> AddImageInClub(string ClubId)
-        {
-            var uploadedFile = Request.Form.Files.FirstOrDefault();
-            Club? club = _db.Clubs.FirstOrDefault(club => club.Id.ToString() == ClubId);
-            if (club == null)
-            {
-                return BadRequest("Такого Клуба нет :(");
-            }
-            if (uploadedFile != null)
-            {
-                // Проверка, является ли файл изображением
-                var permittedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif" };
-                var ext = Path.GetExtension(uploadedFile.FileName).ToLowerInvariant();
-                if (!permittedExtensions.Contains(ext))
-                {
-                    return BadRequest("Файл не является изображением");
-                }
-
-                // Проверка типа содержимого
-                var permittedContentTypes = new[] { "image/jpeg", "image/png", "image/gif" };
-                if (!permittedContentTypes.Contains(uploadedFile.ContentType))
-                {
-                    return BadRequest("Файл не является изображением");
-                }
-                //// путь к папке Files
-                //string folderPath = Path.Combine(_appEnvironment.WebRootPath, "Files", club.Title);
-                //string filePath = Path.Combine(folderPath, uploadedFile.FileName);
-                //// Создание папки, если она не существует
-                //if (!Directory.Exists(folderPath))
-                //{
-                //    Directory.CreateDirectory(folderPath);
-                //}
-
-                // Удаление старого изображения, если оно существует
-                if (club.ClubImage != null)
-                {
-                    string oldImagePath = _appEnvironment.ContentRootPath + club.ClubImage.Path;
-                    if (System.IO.File.Exists(oldImagePath))
-                    {
-                        System.IO.File.Delete(oldImagePath);
-                    }
-                    _db.Images.Remove(club.ClubImage);
-                }
-                // путь к папке Files
-                string path = $"/Images/{club.Title}/" + uploadedFile.FileName;
-                // сохраняем файл в папку Files в каталоге wwwroot
-                using (var fileStream = new FileStream(_appEnvironment.ContentRootPath + path, FileMode.Create))
-                {
-                    await uploadedFile.CopyToAsync(fileStream);
-                }
-                Image image = new Image { ImageName = uploadedFile.FileName, Path = path };
-                club.ClubImage = image;
-                _db.Images.Add(image);
-                _db.SaveChanges();
-            }
-
-            return Ok("Изображение успешно добавлено");
-        }
+       
 
 
         [Authorize]
