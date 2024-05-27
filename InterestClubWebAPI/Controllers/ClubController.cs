@@ -33,79 +33,94 @@ namespace InterestClubWebAPI.Controllers
         [HttpPost("CreateClub")]
         public async Task<IActionResult> CreateClub(string title, string description, string fullDescription, string userId, IFormFile file)
         {
-            User? user = _db.Users.FirstOrDefault(u => u.Id.ToString() == userId);
+            try
+            {
+                User? user = _db.Users.FirstOrDefault(u => u.Id.ToString() == userId);
 
-            if (user == null)
-            {
-                return BadRequest("User not found.");
-            }
-
-            if (_db.Clubs.Any(c => c.Title == title))
-            {
-                return BadRequest("Club with the same title already exists.");
-            }
-            Club club = new Club { Title = title, Description = description, FullDescription = fullDescription, CreatorClubID = user.Id };
-            club.CreatorClubID = user.Id;
-            club.Users.Add(user);
-            _db.Clubs.Add(club);
-            _db.SaveChanges();            
-            if (file != null)
-            {
-                try
+                if (user == null)
                 {
-                    string rezult;
-                    rezult = await SaveFileModel.SaveFile(_appEnvironment.ContentRootPath, "Clubs", club.Title,file);
-                    if (rezult != "Изображение успешно сохранено") 
+                    return BadRequest("User not found.");
+                }
+
+                if (_db.Clubs.Any(c => c.Title == title))
+                {
+                    return BadRequest("Club with the same title already exists.");
+                }
+                Club club = new Club { Title = title, Description = description, FullDescription = fullDescription, CreatorClubID = user.Id };
+                club.CreatorClubID = user.Id;
+                club.Users.Add(user);
+                _db.Clubs.Add(club);
+                _db.SaveChanges();
+                if (file != null)
+                {
+                    try
                     {
-                        return BadRequest(rezult);
-                    }                    
+                        string rezult;
+                        rezult = await SaveFileModel.SaveFile(_appEnvironment.ContentRootPath, "Clubs", club.Title, file);
+                        if (rezult != "Изображение успешно сохранено")
+                        {
+                            return BadRequest(rezult);
+                        }
 
-                    // Формируем URL для изображения
-                    string imageUrl = Url.Content("~/StaticFiles/Clubs/" + club.Title + "/" + file.FileName);
-                    Image image = new Image { ImageName = file.FileName, Path = imageUrl };
-                    club.ClubImage = image;
-                    _db.Images.Add(image);
-                    _db.SaveChanges();
+                        // Формируем URL для изображения
+                        string imageUrl = Url.Content("~/StaticFiles/Clubs/" + club.Title + "/" + file.FileName);
+                        Image image = new Image { ImageName = file.FileName, Path = imageUrl };
+                        club.ClubImage = image;
+                        _db.Images.Add(image);
+                        _db.SaveChanges();
 
-                    //return Ok(new { message = "Изображение успешно добавлено", imageUrl });
+                        //return Ok(new { message = "Изображение успешно добавлено", imageUrl });
+                    }
+                    catch (Exception ex)
+                    {
+                        return BadRequest(new { message = "Ошибка при загрузке файла", error = ex.Message });
+                    }
+
                 }
-                catch (Exception ex)
-                {
-                    return BadRequest(new { message = "Ошибка при загрузке файла", error = ex.Message });
-                }
+                var clubDTO = club.ToDTO();
 
+                return Ok(clubDTO);
             }
-            var clubDTO = club.ToDTO();
+            catch (Exception ex) 
+            {
+                return BadRequest(new { message = "Ошибка при выполнении Роута", error = ex.Message });
+            }
 
-            return Ok(clubDTO);
         }
 
             [Authorize]
         [HttpDelete("DeleteClub")]
         public IActionResult DeleteClub(string id)
         {
-            Club? club = _db.Clubs.FirstOrDefault(club => club.Id.ToString() == id);
-
-            if (club != null)
+            try
             {
-                // Путь к папке клуба
-                string clubDirectoryPath = Path.Combine(_appEnvironment.ContentRootPath, "MyStaticFiles\\Clubs", club.Title);
+                Club? club = _db.Clubs.FirstOrDefault(club => club.Id.ToString() == id);
 
-                // Проверка, существует ли папка
-                if (Directory.Exists(clubDirectoryPath))
+                if (club != null)
                 {
-                    // Удаление папки и ее содержимого
-                    Directory.Delete(clubDirectoryPath, true);
-                }
+                    // Путь к папке клуба
+                    string clubDirectoryPath = Path.Combine(_appEnvironment.ContentRootPath, "MyStaticFiles\\Clubs", club.Title);
 
-                // Удаление записи клуба из базы данных
-                _db.Clubs.Remove(club);
-                _db.SaveChanges();
-                return Ok();
+                    // Проверка, существует ли папка
+                    if (Directory.Exists(clubDirectoryPath))
+                    {
+                        // Удаление папки и ее содержимого
+                        Directory.Delete(clubDirectoryPath, true);
+                    }
+
+                    // Удаление записи клуба из базы данных
+                    _db.Clubs.Remove(club);
+                    _db.SaveChanges();
+                    return Ok();
+                }
+                else
+                {
+                    return BadRequest("Нет клуба с таким ID");
+                }
             }
-            else
+            catch (Exception ex)
             {
-                return BadRequest("Нет клуба с таким ID");
+                return BadRequest(new { message = "Ошибка при выполнении Роута", error = ex.Message });
             }
         }
 
@@ -114,39 +129,53 @@ namespace InterestClubWebAPI.Controllers
         [HttpGet("GetClub")]
         public IActionResult GetClub(string id)
         {
+            try
+            {
+                Club? club = _db.Clubs.Include(c => c.Users).Include(c => c.Events).Include(c => c.Discussions).Include(c => c.ClubImage).FirstOrDefault(club => club.Id.ToString() == id);
+                if (club == null)
+                {
+                    return BadRequest("Такого Клуба нет :(");
+                }
+                else
+                {
+                    var clubDTO = club.ToDTO();
+                    return Ok(clubDTO);
+                }
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = "Ошибка при выполнении Роута", error = ex.Message });
+            }
 
-            Club? club = _db.Clubs.Include(c => c.Users).Include(c => c.Events).Include(c => c.Discussions).Include(c => c.ClubImage).FirstOrDefault(club => club.Id.ToString() == id);
-            if (club == null)
-            {
-                return BadRequest("Такого Клуба нет :(");
-            }
-            else
-            {
-                var clubDTO = club.ToDTO();
-                return Ok(clubDTO);
-            }
         }
         [AllowAnonymous]
         [HttpGet("GetAllClubs")]
         public IActionResult GetAllClubs()
         {
-            var clubs = _db.Clubs.Include(c => c.Users).Include(c => c.Events).Include(c => c.Discussions).Include(c => c.ClubImage).ToList();
-
-            if (clubs.Any())
+            try
             {
-                List<ClubDTO> clubDTOs = new List<ClubDTO>();
+                var clubs = _db.Clubs.Include(c => c.Users).Include(c => c.Events).Include(c => c.Discussions).Include(c => c.ClubImage).ToList();
 
-                foreach (var club in clubs)
+                if (clubs.Any())
                 {
-                    var clubDTO = club.ToDTO();
-                    clubDTOs.Add(clubDTO);
-                }
+                    List<ClubDTO> clubDTOs = new List<ClubDTO>();
 
-                return Ok(clubDTOs);
+                    foreach (var club in clubs)
+                    {
+                        var clubDTO = club.ToDTO();
+                        clubDTOs.Add(clubDTO);
+                    }
+
+                    return Ok(clubDTOs);
+                }
+                else
+                {
+                    return BadRequest("Такого Клуба нет :(");
+                }
             }
-            else
+            catch (Exception ex)
             {
-                return BadRequest("Такого Клуба нет :(");
+                return BadRequest(new { message = "Ошибка при выполнении Роута", error = ex.Message });
             }
         }
        
@@ -156,61 +185,67 @@ namespace InterestClubWebAPI.Controllers
         [HttpPost("EditClub")]
         public async Task<IActionResult> EditUser(string clubId,string title, string description, string fullDescription, IFormFile? file)
         {
-            var token = HttpContext.GetTokenAsync("access_token");
-            var userCreditans = _authentication.getUserCreditansFromJWT(token.Result);
-            User? user = _db.Users.FirstOrDefault(u => u.Login == userCreditans.login && u.Password == userCreditans.password);
-            if(user == null)
+            try
             {
-                return BadRequest("Нет такого пользователя от которого идет запрос :(");
-            }
-            Club? club = _db.Clubs.Include(c => c.ClubImage).FirstOrDefault(c => c.Id.ToString()== clubId);
-            if(club == null)
-            {
-                return BadRequest("Нет такого клуба :(");
-            }
-            if(club.CreatorClubID == user.Id || user.Role == Enums.Role.admin) 
-            {
-                
-
-                if (file != null) 
+                var token = HttpContext.GetTokenAsync("access_token");
+                var userCreditans = _authentication.getUserCreditansFromJWT(token.Result);
+                User? user = _db.Users.FirstOrDefault(u => u.Login == userCreditans.login && u.Password == userCreditans.password);
+                if (user == null)
                 {
-                    // Удаление старого изображения, если оно существует
-                    if (club.ClubImage != null)
-                    {
-                        // Путь к папке клуба
-                        string oldImagePath = Path.Combine(_appEnvironment.ContentRootPath, "MyStaticFiles\\Clubs", club.Title);
-
-                        // Проверка, существует ли папка
-                        if (Directory.Exists(oldImagePath))
-                        {
-                            // Удаление папки и ее содержимого
-                            Directory.Delete(oldImagePath, true);
-                        }
-                        _db.Images.Remove(club.ClubImage);
-                    }
-                    club.Title = title;
-                    string rezult;
-                    rezult = await SaveFileModel.SaveFile(_appEnvironment.ContentRootPath, "Clubs", club.Title, file);
-                    if (rezult != "Изображение успешно сохранено")
-                    {
-                        return BadRequest(rezult);
-                    }
+                    return BadRequest("Нет такого пользователя от которого идет запрос :(");
                 }
-                string imageUrl = Url.Content("~/StaticFiles/Clubs/" + club.Title + "/" + file.FileName);
-                Image image = new Image { ImageName = file.FileName, Path = imageUrl };
-                club.Title = title;
-                club.Description = description;
-                club.FullDescription = fullDescription;
-                club.ClubImage = image;
-                _db.Images.Add(image);
-                _db.SaveChanges();                              
-                return Ok("Клуб успешно изменен");
-            }
-            else
-            {
-                return BadRequest("Нет прав для изменения клуба :(");
-            }            
+                Club? club = _db.Clubs.Include(c => c.ClubImage).FirstOrDefault(c => c.Id.ToString() == clubId);
+                if (club == null)
+                {
+                    return BadRequest("Нет такого клуба :(");
+                }
+                if (club.CreatorClubID == user.Id || user.Role == Enums.Role.admin)
+                {
 
+
+                    if (file != null)
+                    {
+                        // Удаление старого изображения, если оно существует
+                        if (club.ClubImage != null)
+                        {
+                            // Путь к папке клуба
+                            string oldImagePath = Path.Combine(_appEnvironment.ContentRootPath, "MyStaticFiles\\Clubs", club.Title);
+
+                            // Проверка, существует ли папка
+                            if (Directory.Exists(oldImagePath))
+                            {
+                                // Удаление папки и ее содержимого
+                                Directory.Delete(oldImagePath, true);
+                            }
+                            _db.Images.Remove(club.ClubImage);
+                        }
+                        club.Title = title;
+                        string rezult;
+                        rezult = await SaveFileModel.SaveFile(_appEnvironment.ContentRootPath, "Clubs", club.Title, file);
+                        if (rezult != "Изображение успешно сохранено")
+                        {
+                            return BadRequest(rezult);
+                        }
+                    }
+                    string imageUrl = Url.Content("~/StaticFiles/Clubs/" + club.Title + "/" + file.FileName);
+                    Image image = new Image { ImageName = file.FileName, Path = imageUrl };
+                    club.Title = title;
+                    club.Description = description;
+                    club.FullDescription = fullDescription;
+                    club.ClubImage = image;
+                    _db.Images.Add(image);
+                    _db.SaveChanges();
+                    return Ok("Клуб успешно изменен");
+                }
+                else
+                {
+                    return BadRequest("Нет прав для изменения клуба :(");
+                }
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = "Ошибка при выполнении Роута", error = ex.Message });
+            }
         }
     }
 }
