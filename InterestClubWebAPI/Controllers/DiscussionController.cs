@@ -35,7 +35,7 @@ namespace InterestClubWebAPI.Controllers
             {
                 return BadRequest("Обсуждение с таким название уже созданно у этого клуба");
             }            
-            Discussion discussion = new Discussion { ClubId = Guid.Parse(clubId), Title = title, Description = description, FullDescription = fullDescription };
+            Discussion discussion = new Discussion { ClubId = Guid.Parse(clubId),CreatorId = club.CreatorClubID ,Title = title, Description = description, FullDescription = fullDescription };
             club.Discussions.Add(discussion);
             _db.Discussions.Add(discussion);
             _db.SaveChanges();
@@ -108,6 +108,35 @@ namespace InterestClubWebAPI.Controllers
             _db.Comments.Add(comment);
             _db.SaveChanges();
             return Ok("Коментарий успешно добавлен");
+        }
+        [Authorize]
+        [HttpPost("EditDiscussion")]
+        public IActionResult EditUser(string discussionId, string title, string description, string fullDescription)
+        {
+            var token = HttpContext.GetTokenAsync("access_token");
+            var userCreditans = _authentication.getUserCreditansFromJWT(token.Result);
+            User? user = _db.Users.FirstOrDefault(u => u.Login == userCreditans.login && u.Password == userCreditans.password);
+            if (user == null)
+            {
+                return BadRequest("Нет такого пользователя от которого идет запрос :(");
+            }
+            Discussion? discussion = _db.Discussions.FirstOrDefault(d => d.Id.ToString() == discussionId);
+            if (discussion == null)
+            {
+                return BadRequest("Нет такого Обсуждения  :(");
+            }
+            if (discussion.CreatorId == user.Id || user.Role == Enums.Role.admin)
+            {
+                discussion.Title = title;
+                discussion.Description = description;
+                discussion.FullDescription = fullDescription;
+                _db.SaveChanges();
+                return Ok("Клуб успешно изменен");
+            }
+            else
+            {
+                return BadRequest("Нет прав для изменения клуба :(");
+            }
         }
 
     }

@@ -8,6 +8,7 @@ using InterestClubWebAPI.Models.DTOs;
 using static System.Reflection.Metadata.BlobBuilder;
 using InterestClubWebAPI.Repository;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authentication;
 //using System.Data.Entity;
 
 
@@ -27,7 +28,7 @@ namespace InterestClubWebAPI.Controllers
         }
         [Authorize]
         [HttpPost("AddEvent")]
-        public IActionResult AddEvent(string name, string description, string idUser, string idClub)
+        public IActionResult AddEvent(string name, string description, string fullDescription, string idUser, string idClub)
         {
             if (_db.Events.Any(e => e.Name == name))
             {
@@ -43,7 +44,7 @@ namespace InterestClubWebAPI.Controllers
             }
 
             var eventDate = DateTime.Now;
-            var ev = new Event { Name = name, Description = description, EventDate = eventDate.ToString() };//
+            var ev = new Event { Name = name, Description = description, FullDescription = fullDescription, EventDate = eventDate.ToString() };//
             ev.CreatorEventID = user.Id;
             ev.ClubID = club.Id;
             ev.Members.Add(user);
@@ -109,6 +110,35 @@ namespace InterestClubWebAPI.Controllers
             else
             {
                 return BadRequest("Такого Ивента нет :(");
+            }
+        }
+        [Authorize]
+        [HttpPost("EditEvent")]
+        public IActionResult EditUser(string eventId, string name, string description,string fullDescription)
+        {
+            var token = HttpContext.GetTokenAsync("access_token");
+            var userCreditans = _authentication.getUserCreditansFromJWT(token.Result);
+            User? user = _db.Users.FirstOrDefault(u => u.Login == userCreditans.login && u.Password == userCreditans.password);
+            if (user == null)
+            {
+                return BadRequest("Нет такого пользователя от которого идет запрос :(");
+            }
+            Event? ev = _db.Events.FirstOrDefault(e => e.Id.ToString() == eventId);
+            if (ev == null)
+            {
+                return BadRequest("Нет такого Ивента :(");
+            }
+            if (ev.CreatorEventID == user.Id || user.Role == Enums.Role.admin)
+            {
+                ev.Name = name;
+                ev.Description = description;     
+                ev.FullDescription = fullDescription;
+                _db.SaveChanges();
+                return Ok("Клуб успешно изменен");
+            }
+            else
+            {
+                return BadRequest("Нет прав для изменения клуба :(");
             }
         }
     }
