@@ -47,10 +47,10 @@ namespace InterestClubWebAPI.Controllers
         }
         [Authorize]
         [HttpDelete("DeleteClub")]
-        public IActionResult DeleteClub(string title)
+        public IActionResult DeleteClub(string id)
         {
 
-            Club? club = _db.Clubs.FirstOrDefault(club => club.Title == title);
+            Club? club = _db.Clubs.FirstOrDefault(club => club.Id.ToString() == id);
             if (club != null)
             {
                 _db.Clubs.Remove(club);
@@ -59,7 +59,7 @@ namespace InterestClubWebAPI.Controllers
             }
             else
             {
-                return BadRequest("Нет клуба с таким названием");
+                return BadRequest("Нет клуба с таким ID");
             }
         }
 
