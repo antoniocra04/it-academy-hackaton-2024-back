@@ -170,9 +170,7 @@ namespace InterestClubWebAPI.Controllers
             }
             if(club.CreatorClubID == user.Id || user.Role == Enums.Role.admin) 
             {
-                club.Title = title;
-                club.Description = description;
-                club.FullDescription = fullDescription;
+                
 
                 if (file != null) 
                 {
@@ -190,6 +188,7 @@ namespace InterestClubWebAPI.Controllers
                         }
                         _db.Images.Remove(club.ClubImage);
                     }
+                    club.Title = title;
                     string rezult;
                     rezult = await SaveFileModel.SaveFile(_appEnvironment.ContentRootPath, "Clubs", club.Title, file);
                     if (rezult != "Изображение успешно сохранено")
@@ -199,6 +198,9 @@ namespace InterestClubWebAPI.Controllers
                 }
                 string imageUrl = Url.Content("~/StaticFiles/Clubs/" + club.Title + "/" + file.FileName);
                 Image image = new Image { ImageName = file.FileName, Path = imageUrl };
+                club.Title = title;
+                club.Description = description;
+                club.FullDescription = fullDescription;
                 club.ClubImage = image;
                 _db.Images.Add(image);
                 _db.SaveChanges();                              

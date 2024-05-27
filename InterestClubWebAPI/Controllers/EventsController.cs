@@ -169,11 +169,7 @@ namespace InterestClubWebAPI.Controllers
                 return BadRequest("Íåò òàêîãî Èâåíòà :(");
             }
             if (ev.CreatorEventID == user.Id || user.Role == Enums.Role.admin)
-            {
-                ev.Name = name;
-                ev.Description = description;     
-                ev.FullDescription = fullDescription;
-                _db.SaveChanges();
+            {                
                 if (file != null)
                 {
                     // Удаление старого изображения, если оно существует
@@ -190,6 +186,7 @@ namespace InterestClubWebAPI.Controllers
                         }                        
                         _db.Images.Remove(ev.EventImage);
                     }
+                    ev.Name = name;
                     string rezult;
                     rezult = await SaveFileModel.SaveFile(_appEnvironment.ContentRootPath, "Events", ev.Name, file);
                     if (rezult != "Изображение успешно сохранено")
@@ -199,6 +196,9 @@ namespace InterestClubWebAPI.Controllers
                 }
                 string imageUrl = Url.Content("~/StaticFiles/Events/" + ev.Name + "/" + file.FileName);
                 Image image = new Image { ImageName = file.FileName, Path = imageUrl };
+                ev.Name = name;
+                ev.Description = description;
+                ev.FullDescription = fullDescription;                
                 ev.EventImage = image;
                 _db.Images.Add(image);
                 _db.SaveChanges();
