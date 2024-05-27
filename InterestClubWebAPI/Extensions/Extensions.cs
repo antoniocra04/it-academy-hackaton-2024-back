@@ -10,6 +10,7 @@ namespace InterestClubWebAPI.Extensions
     {
         public static ClubDTO ToDTO(this Club club)
         {
+            
             return new ClubDTO
             {
                 Id = club.Id,
@@ -18,6 +19,7 @@ namespace InterestClubWebAPI.Extensions
                 FullDescription = club.FullDescription,
                 CreatorClubID = club.CreatorClubID,
                 CountMembers = club.Users.Count(),
+                ImagePath = club.ClubImage != null ? club.ClubImage.Path : null,
                 //Users = club.Users.Select(u => u.ToDTO()).ToList(),
                 Events = club.Events.Select(e => e.ToDTO()).ToList(),        
                 Discussions = club.Discussions.Select(d => d.ToDTO()).ToList(),
@@ -69,6 +71,7 @@ namespace InterestClubWebAPI.Extensions
                 ClubID = ev.ClubID,
                 EventDate = ev.EventDate,
                 MembersCount = ev.Members.Count(),
+                ImagePath = ev.EventImage != null ? ev.EventImage.Path : null,                
                 //Members = ev.Members.Select(m => m.ToDTO()).ToList(),
                 
             };

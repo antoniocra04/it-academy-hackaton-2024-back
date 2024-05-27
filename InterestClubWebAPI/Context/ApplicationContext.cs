@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using InterestClubWebAPI.Models;
+using System.IO;
 
 
 
@@ -17,7 +18,8 @@ namespace InterestClubWebAPI.Context
 
         public DbSet<Comment> Comments { get; set; }
 
-        
+        public DbSet<Image> Images { get; set; }
+
         public ApplicationContext(DbContextOptions<ApplicationContext> options) : base(options)
         {
 
