@@ -30,7 +30,7 @@ namespace InterestClubWebAPI.Controllers
         }
         [Authorize]
         [HttpPost("CreateClub")]
-        public IActionResult CreateClub(string title, string description, string fullDescription, string userId)
+        public async Task<IActionResult> CreateClub(string title, string description, string fullDescription, string userId)
         {
             User? user = _db.Users.FirstOrDefault(u => u.Id.ToString() == userId);
 
@@ -48,7 +48,20 @@ namespace InterestClubWebAPI.Controllers
             club.Users.Add(user);
             _db.Clubs.Add(club);
             _db.SaveChanges();
+            if(Request.Form.Files.FirstOrDefault()  != null)
+            {
+                try
+                {
+                    await AddImageInClub(club.Id.ToString());
+                }
+                catch (Exception ex)
+                {
+                    return BadRequest(new { message = "Ошибка при загрузке файла", error = ex.Message });
+                }
+
+            }
             var clubDTO = club.ToDTO();
+
             return Ok(clubDTO);
         }
         [Authorize]
@@ -121,8 +134,6 @@ namespace InterestClubWebAPI.Controllers
             }
         }
 
-        [Authorize]
-        [HttpPost("AddImageInClub")]
         public async Task<IActionResult> AddImageInClub(string ClubId)
         {
             var uploadedFile = Request.Form.Files.FirstOrDefault();
@@ -181,6 +192,7 @@ namespace InterestClubWebAPI.Controllers
 
             return Ok("Изображение успешно добавлено");
         }
+
 
         [Authorize]
         [HttpPost("EditClub")]
