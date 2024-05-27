@@ -47,64 +47,54 @@ namespace InterestClubWebAPI.Controllers
             club.CreatorClubID = user.Id;
             club.Users.Add(user);
             _db.Clubs.Add(club);
-            _db.SaveChanges();
-            var uploadedFile = Request.Form.Files.FirstOrDefault();
-            if (uploadedFile != null)
+            _db.SaveChanges();            
+            if (file != null)
             {
                 try
-                {                   
-                    //Club? club = _db.Clubs.FirstOrDefault(club => club.Id.ToString() == ClubId);
-                    if (club == null)
+                {
+                    // Проверка, является ли файл изображением
+                    var permittedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif" };
+                    var ext = Path.GetExtension(file.FileName).ToLowerInvariant();
+                    if (!permittedExtensions.Contains(ext))
                     {
-                        return BadRequest("Такого Клуба нет :(");
+                        return BadRequest("Файл не является изображением");
                     }
-                    if (uploadedFile != null)
+
+                    // Проверка типа содержимого
+                    var permittedContentTypes = new[] { "image/jpeg", "image/png", "image/gif" };
+                    if (!permittedContentTypes.Contains(file.ContentType))
                     {
-                        // Проверка, является ли файл изображением
-                        var permittedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif" };
-                        var ext = Path.GetExtension(uploadedFile.FileName).ToLowerInvariant();
-                        if (!permittedExtensions.Contains(ext))
-                        {
-                            return BadRequest("Файл не является изображением");
-                        }
-
-                        // Проверка типа содержимого
-                        var permittedContentTypes = new[] { "image/jpeg", "image/png", "image/gif" };
-                        if (!permittedContentTypes.Contains(uploadedFile.ContentType))
-                        {
-                            return BadRequest("Файл не является изображением");
-                        }
-                        //// путь к папке Files
-                        string folderPath = Path.Combine(_appEnvironment.ContentRootPath, "Files", club.Title);
-                        string filePath = Path.Combine(folderPath, uploadedFile.FileName);
-                        //// Создание папки, если она не существует
-                        if (!Directory.Exists(folderPath))
-                        {
-                            Directory.CreateDirectory(folderPath);
-                        }
-
-                        // Удаление старого изображения, если оно существует
-                        if (club.ClubImage != null)
-                        {
-                            string oldImagePath = _appEnvironment.ContentRootPath + club.ClubImage.Path;
-                            if (System.IO.File.Exists(oldImagePath))
-                            {
-                                System.IO.File.Delete(oldImagePath);
-                            }
-                            _db.Images.Remove(club.ClubImage);
-                        }
-                        // путь к папке Files
-                        string path = $"/Images/{club.Title}/" + uploadedFile.FileName;
-                        // сохраняем файл в папку Files в каталоге wwwroot
-                        using (var fileStream = new FileStream(folderPath, FileMode.Create))
-                        {
-                            await uploadedFile.CopyToAsync(fileStream);
-                        }
-                        Image image = new Image { ImageName = uploadedFile.FileName, Path = path };
-                        club.ClubImage = image;
-                        _db.Images.Add(image);
-                        _db.SaveChanges();
+                        return BadRequest("Файл не является изображением");
                     }
+                    //// путь к папке Files
+                    string folderPath = Path.Combine("D:\\Hacathon2024Files", "Files", club.Title);
+                    string filePath = Path.Combine(folderPath, file.FileName);
+                    //// Создание папки, если она не существует
+                    if (!Directory.Exists(folderPath))
+                    {
+                        Directory.CreateDirectory(folderPath);
+                    }
+
+                    // Удаление старого изображения, если оно существует
+                    if (club.ClubImage != null)
+                    {
+                        string oldImagePath = _appEnvironment.ContentRootPath + club.ClubImage.Path;
+                        if (System.IO.File.Exists(oldImagePath))
+                        {
+                            System.IO.File.Delete(oldImagePath);
+                        }
+                        _db.Images.Remove(club.ClubImage);
+                    }                    
+                    // сохраняем файл в папку Files в каталоге wwwroot
+                    using (var fileStream = new FileStream(folderPath, FileMode.Create))
+                    {
+                        await file.CopyToAsync(fileStream);
+                    }
+                    Image image = new Image { ImageName = file.FileName, Path = folderPath };
+                    club.ClubImage = image;
+                    _db.Images.Add(image);
+                    _db.SaveChanges();
+
 
                     return Ok("Изображение успешно добавлено");
                 }

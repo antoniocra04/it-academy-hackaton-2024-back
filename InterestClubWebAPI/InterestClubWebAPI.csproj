@@ -10,6 +10,17 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Files - Копировать\**" />
+    <Compile Remove="Images\**" />
+    <Content Remove="Files - Копировать\**" />
+    <Content Remove="Images\**" />
+    <EmbeddedResource Remove="Files - Копировать\**" />
+    <EmbeddedResource Remove="Images\**" />
+    <None Remove="Files - Копировать\**" />
+    <None Remove="Images\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Dapper" Version="2.1.35" />
     <PackageReference Include="EntityFramework" Version="6.4.4" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.5" />
@@ -25,7 +36,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Images\" />
+    <Folder Include="Files\" />
   </ItemGroup>
 
 </Project>
