@@ -67,7 +67,7 @@ namespace InterestClubWebAPI.Controllers
                         return BadRequest("Файл не является изображением");
                     }
                     //// путь к папке Files
-                    string folderPath = Path.Combine(_appEnvironment.ContentRootPath, "Files", club.Title);
+                    string folderPath = Path.Combine(_appEnvironment.WebRootPath, "Files\\Clubs", club.Title);
                     string filePath = Path.Combine(folderPath, file.FileName);
                     //// Создание папки, если она не существует
                     if (!Directory.Exists(folderPath))
@@ -78,7 +78,7 @@ namespace InterestClubWebAPI.Controllers
                     // Удаление старого изображения, если оно существует
                     if (club.ClubImage != null)
                     {
-                        string oldImagePath = _appEnvironment.ContentRootPath + club.ClubImage.Path;
+                        string oldImagePath = _appEnvironment.WebRootPath + club.ClubImage.Path;
                         if (System.IO.File.Exists(oldImagePath))
                         {
                             System.IO.File.Delete(oldImagePath);
@@ -117,7 +117,7 @@ namespace InterestClubWebAPI.Controllers
             if (club != null)
             {
                 // Путь к папке клуба
-                string clubDirectoryPath = Path.Combine(_appEnvironment.ContentRootPath, "Files", club.Title);
+                string clubDirectoryPath = Path.Combine(_appEnvironment.WebRootPath, "Files\\Clubs", club.Title);
 
                 // Проверка, существует ли папка
                 if (Directory.Exists(clubDirectoryPath))

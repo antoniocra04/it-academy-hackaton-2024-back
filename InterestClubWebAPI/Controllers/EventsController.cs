@@ -9,6 +9,7 @@ using static System.Reflection.Metadata.BlobBuilder;
 using InterestClubWebAPI.Repository;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Authentication;
+using System.Linq;
 //using System.Data.Entity;
 
 
@@ -30,7 +31,7 @@ namespace InterestClubWebAPI.Controllers
         }
         [Authorize]
         [HttpPost("AddEvent")]
-        public IActionResult AddEvent(string name, string description, string fullDescription, string idUser, string idClub)
+        public async Task<IActionResult> AddEvent(string name, string description, string fullDescription, string idUser, string idClub, IFormFile file)
         {
             if (_db.Events.Any(e => e.Name == name))
             {
@@ -52,6 +53,62 @@ namespace InterestClubWebAPI.Controllers
             ev.Members.Add(user);
             _db.Events.Add(ev);
             _db.SaveChanges();
+            if (file != null)
+            {
+                try
+                {
+                    // Проверка, является ли файл изображением
+                    var permittedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif" };
+                    var ext = Path.GetExtension(file.FileName).ToLowerInvariant();
+                    if (!permittedExtensions.Contains(ext))
+                    {
+                        return BadRequest("Файл не является изображением");
+                    }
+
+                    // Проверка типа содержимого
+                    var permittedContentTypes = new[] { "image/jpeg", "image/png", "image/gif" };
+                    if (!permittedContentTypes.Contains(file.ContentType))
+                    {
+                        return BadRequest("Файл не является изображением");
+                    }
+                    // путь к папке Files
+                    string folderPath = Path.Combine(_appEnvironment.ContentRootPath, "Files\\Events", ev.Name);
+                    string filePath = Path.Combine(folderPath, file.FileName);
+                    // Создание папки, если она не существует
+                    if (!Directory.Exists(folderPath))
+                    {
+                        Directory.CreateDirectory(folderPath);
+                    }
+
+                    // Удаление старого изображения, если оно существует
+                    if (club.ClubImage != null)
+                    {
+                        string oldImagePath = _appEnvironment.ContentRootPath + ev.EventImage.Path;
+                        if (System.IO.File.Exists(oldImagePath))
+                        {
+                            System.IO.File.Delete(oldImagePath);
+                        }
+                        _db.Images.Remove(ev.EventImage);
+                    }
+                    // сохраняем файл в папку Files в каталоге wwwroot
+                    using (var fileStream = new FileStream(filePath, FileMode.Create))
+                    {
+                        await file.CopyToAsync(fileStream);
+                    }
+                    Image image = new Image { ImageName = file.FileName, Path = filePath };
+                    ev.EventImage = image;
+                    _db.Images.Add(image);
+                    _db.SaveChanges();
+
+
+                    return Ok("Изображение успешно добавлено");
+                }
+                catch (Exception ex)
+                {
+                    return BadRequest(new { message = "Ошибка при загрузке файла", error = ex.Message });
+                }
+
+            }
             var eventDTO = ev.ToDTO();
             return Ok(eventDTO);
         }
@@ -67,7 +124,7 @@ namespace InterestClubWebAPI.Controllers
             else
             {
                 // Ïóòü ê ïàïêå êëóáà
-                string eventDirectoryPath = Path.Combine(_appEnvironment.ContentRootPath, "Images", ev.Name);
+                string eventDirectoryPath = Path.Combine(_appEnvironment.ContentRootPath, "Files\\Events", ev.Name);
 
                 // Ïðîâåðêà, ñóùåñòâóåò ëè ïàïêà
                 if (Directory.Exists(eventDirectoryPath))
@@ -91,7 +148,7 @@ namespace InterestClubWebAPI.Controllers
         [HttpGet("getEvent")]
         public IActionResult getEvent(string id)
         {
-            Event? ev = _db.Events.Include(e => e.Members).FirstOrDefault(e => e.Id.ToString() == id);
+            Event? ev = _db.Events.Include(e => e.Members).Include(e => e.EventImage).FirstOrDefault(e => e.Id.ToString() == id);
             if (ev == null)
             {
                 return BadRequest("Òàêîãî Èâåíòà íåò :(");
@@ -106,7 +163,7 @@ namespace InterestClubWebAPI.Controllers
         [HttpGet("getAllEvents")]
         public IActionResult getAllEvents(string id)
         {
-            var events = _db.Events.Include(e => e.Members).ToList().Where(e => e.ClubID.ToString() == id);
+            var events = _db.Events.Include(e => e.Members).Include(e=> e.EventImage).ToList().Where(e => e.ClubID.ToString() == id);
             if (events.Any())
             {
                 List<EventDTO> eventDTOs = new List<EventDTO>();
@@ -123,59 +180,7 @@ namespace InterestClubWebAPI.Controllers
             {
                 return BadRequest("Òàêîãî Èâåíòà íåò :(");
             }
-        }
-        [Authorize]
-        [HttpPost("AddImageInEvent")]
-        public async Task<IActionResult> AddImageInEvent(string eventId)
-        {
-            var uploadedFile = Request.Form.Files.FirstOrDefault();
-            Event? ev = _db.Events.FirstOrDefault(e => e.Id.ToString() == eventId);
-            if (ev == null)
-            {
-                return BadRequest("Òàêîãî Èâåíòà íåò :(");
-            }
-            if (uploadedFile != null)
-            {
-                // Ïðîâåðêà, ÿâëÿåòñÿ ëè ôàéë èçîáðàæåíèåì
-                var permittedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif" };
-                var ext = Path.GetExtension(uploadedFile.FileName).ToLowerInvariant();
-                if (!permittedExtensions.Contains(ext))
-                {
-                    return BadRequest("Ôàéë íå ÿâëÿåòñÿ èçîáðàæåíèåì");
-                }
-
-                // Ïðîâåðêà òèïà ñîäåðæèìîãî
-                var permittedContentTypes = new[] { "image/jpeg", "image/png", "image/gif" };
-                if (!permittedContentTypes.Contains(uploadedFile.ContentType))
-                {
-                    return BadRequest("Ôàéë íå ÿâëÿåòñÿ èçîáðàæåíèåì");
-                }
-
-                // Óäàëåíèå ñòàðîãî èçîáðàæåíèÿ, åñëè îíî ñóùåñòâóåò
-                if (ev.EventImage != null)
-                {
-                    string oldImagePath = _appEnvironment.ContentRootPath + ev.EventImage.Path;
-                    if (System.IO.File.Exists(oldImagePath))
-                    {
-                        System.IO.File.Delete(oldImagePath);
-                    }
-                    _db.Images.Remove(ev.EventImage);
-                }
-                // ïóòü ê ïàïêå Files
-                string path = $"/Images/{ev.Name}/" + uploadedFile.FileName;
-                // ñîõðàíÿåì ôàéë â ïàïêó Files â êàòàëîãå wwwroot
-                using (var fileStream = new FileStream(_appEnvironment.ContentRootPath + path, FileMode.Create))
-                {
-                    await uploadedFile.CopyToAsync(fileStream);
-                }
-                Image image = new Image { ImageName = uploadedFile.FileName, Path = path };
-                ev.EventImage = image;
-                _db.Images.Add(image);
-                _db.SaveChanges();
-            }
-
-            return Ok("Èçîáðàæåíèå óñïåøíî äîáàâëåíî");
-        }
+        }        
         
         [Authorize]
         [HttpPost("EditEvent")]
