@@ -45,6 +45,7 @@ namespace InterestClubWebAPI.Controllers
         [HttpGet("GetDiscussionById")]
         public IActionResult GetDiscussionById(string discussionsId)
         {
+            
             Discussion? discussion = _db.Discussions.Include(d => d.comments).FirstOrDefault(d => d.Id.ToString() == discussionsId);
             if (discussion == null)
             {
