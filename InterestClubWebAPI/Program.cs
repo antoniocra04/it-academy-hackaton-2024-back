@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
+using Microsoft.Extensions.FileProviders;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -70,6 +71,7 @@ builder.Services.AddDbContext<ApplicationContext>(options =>
     options.UseNpgsql("Host=aws-0-eu-central-1.pooler.supabase.com;Port=5432;Database=postgres;Username=postgres.ljhexoykjtmlvbjpriks;Password=Hackaton20052024"));
 builder.Services.AddScoped<IJWTAuthManager, JWTAuthManager>();
 
+builder.Services.AddDirectoryBrowser();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -80,6 +82,14 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseFileServer(new FileServerOptions
+{
+    FileProvider = new PhysicalFileProvider(
+           Path.Combine(builder.Environment.ContentRootPath, "MyStaticFiles")),
+    RequestPath = "/StaticFiles",
+    EnableDirectoryBrowsing = true
+});
 
 app.UseAuthentication();
 app.UseAuthorization();

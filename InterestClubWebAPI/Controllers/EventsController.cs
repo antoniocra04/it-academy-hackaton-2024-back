@@ -72,7 +72,7 @@ namespace InterestClubWebAPI.Controllers
                         return BadRequest("Файл не является изображением");
                     }
                     // путь к папке Files
-                    string folderPath = Path.Combine(_appEnvironment.ContentRootPath, "Files\\Events", ev.Name);
+                    string folderPath = Path.Combine(_appEnvironment.ContentRootPath, "MyStaticFiles\\Events", ev.Name);
                     string filePath = Path.Combine(folderPath, file.FileName);
                     // Создание папки, если она не существует
                     if (!Directory.Exists(folderPath))
@@ -95,13 +95,14 @@ namespace InterestClubWebAPI.Controllers
                     {
                         await file.CopyToAsync(fileStream);
                     }
-                    Image image = new Image { ImageName = file.FileName, Path = filePath };
+                    string imageUrl = Url.Content("~/StaticFiles/Events/" + ev.Name + "/" + file.FileName);
+                    Image image = new Image { ImageName = file.FileName, Path = imageUrl };
                     ev.EventImage = image;
                     _db.Images.Add(image);
                     _db.SaveChanges();
 
 
-                    return Ok("Изображение успешно добавлено");
+                    return Ok(new { message = "Изображение успешно добавлено", imageUrl });
                 }
                 catch (Exception ex)
                 {
@@ -124,7 +125,7 @@ namespace InterestClubWebAPI.Controllers
             else
             {
                 // Ïóòü ê ïàïêå êëóáà
-                string eventDirectoryPath = Path.Combine(_appEnvironment.ContentRootPath, "Files\\Events", ev.Name);
+                string eventDirectoryPath = Path.Combine(_appEnvironment.ContentRootPath, "MyStaticFiles\\Events", ev.Name);
 
                 // Ïðîâåðêà, ñóùåñòâóåò ëè ïàïêà
                 if (Directory.Exists(eventDirectoryPath))

@@ -12,6 +12,7 @@ using System.Xml.Linq;
 
 using System.IO;
 using System.Threading;
+using Microsoft.AspNetCore.Hosting.Server;
 
 namespace InterestClubWebAPI.Controllers
 {
@@ -67,7 +68,7 @@ namespace InterestClubWebAPI.Controllers
                         return BadRequest("Файл не является изображением");
                     }
                     //// путь к папке Files
-                    string folderPath = Path.Combine(_appEnvironment.WebRootPath, "Files\\Clubs", club.Title);
+                    string folderPath = Path.Combine(_appEnvironment.ContentRootPath, "MyStaticFiles\\Clubs", club.Title);
                     string filePath = Path.Combine(folderPath, file.FileName);
                     //// Создание папки, если она не существует
                     if (!Directory.Exists(folderPath))
@@ -78,7 +79,7 @@ namespace InterestClubWebAPI.Controllers
                     // Удаление старого изображения, если оно существует
                     if (club.ClubImage != null)
                     {
-                        string oldImagePath = _appEnvironment.WebRootPath + club.ClubImage.Path;
+                        string oldImagePath = _appEnvironment.ContentRootPath + club.ClubImage.Path;
                         if (System.IO.File.Exists(oldImagePath))
                         {
                             System.IO.File.Delete(oldImagePath);
@@ -90,13 +91,14 @@ namespace InterestClubWebAPI.Controllers
                     {
                         await file.CopyToAsync(fileStream);
                     }
-                    Image image = new Image { ImageName = file.FileName, Path = filePath };
+                    // Формируем URL для изображения
+                    string imageUrl = Url.Content("~/StaticFiles/Clubs/" + club.Title + "/" + file.FileName);
+                    Image image = new Image { ImageName = file.FileName, Path = imageUrl };
                     club.ClubImage = image;
                     _db.Images.Add(image);
                     _db.SaveChanges();
 
-
-                    return Ok("Изображение успешно добавлено");
+                    return Ok(new { message = "Изображение успешно добавлено", imageUrl });
                 }
                 catch (Exception ex)
                 {
@@ -108,7 +110,8 @@ namespace InterestClubWebAPI.Controllers
 
             return Ok(clubDTO);
         }
-        [Authorize]
+
+            [Authorize]
         [HttpDelete("DeleteClub")]
         public IActionResult DeleteClub(string id)
         {
@@ -117,7 +120,7 @@ namespace InterestClubWebAPI.Controllers
             if (club != null)
             {
                 // Путь к папке клуба
-                string clubDirectoryPath = Path.Combine(_appEnvironment.WebRootPath, "Files\\Clubs", club.Title);
+                string clubDirectoryPath = Path.Combine(_appEnvironment.ContentRootPath, "MyStaticFiles\\Clubs", club.Title);
 
                 // Проверка, существует ли папка
                 if (Directory.Exists(clubDirectoryPath))
