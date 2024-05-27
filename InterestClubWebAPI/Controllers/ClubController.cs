@@ -67,7 +67,7 @@ namespace InterestClubWebAPI.Controllers
                         return BadRequest("Файл не является изображением");
                     }
                     //// путь к папке Files
-                    string folderPath = Path.Combine("D:\\Hacathon2024Files", "Files", club.Title);
+                    string folderPath = Path.Combine(_appEnvironment.ContentRootPath, "Files", club.Title);
                     string filePath = Path.Combine(folderPath, file.FileName);
                     //// Создание папки, если она не существует
                     if (!Directory.Exists(folderPath))
@@ -84,9 +84,10 @@ namespace InterestClubWebAPI.Controllers
                             System.IO.File.Delete(oldImagePath);
                         }
                         _db.Images.Remove(club.ClubImage);
-                    }                    
+                    }
+                    //string filePath = Path.Combine(folderPath, file.FileName);
                     // сохраняем файл в папку Files в каталоге wwwroot
-                    using (var fileStream = new FileStream(folderPath, FileMode.Create))
+                    using (var fileStream = new FileStream(filePath, FileMode.Create))
                     {
                         await file.CopyToAsync(fileStream);
                     }
