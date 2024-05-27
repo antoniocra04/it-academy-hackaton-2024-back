@@ -90,7 +90,7 @@ namespace InterestClubWebAPI.Controllers
                     {
                         await file.CopyToAsync(fileStream);
                     }
-                    Image image = new Image { ImageName = file.FileName, Path = folderPath };
+                    Image image = new Image { ImageName = file.FileName, Path = filePath };
                     club.ClubImage = image;
                     _db.Images.Add(image);
                     _db.SaveChanges();
@@ -117,7 +117,7 @@ namespace InterestClubWebAPI.Controllers
             if (club != null)
             {
                 // Путь к папке клуба
-                string clubDirectoryPath = Path.Combine(_appEnvironment.ContentRootPath, "Images", club.Title);
+                string clubDirectoryPath = Path.Combine(_appEnvironment.ContentRootPath, "Files", club.Title);
 
                 // Проверка, существует ли папка
                 if (Directory.Exists(clubDirectoryPath))
