@@ -53,44 +53,13 @@ namespace InterestClubWebAPI.Controllers
             {
                 try
                 {
-                    // Проверка, является ли файл изображением
-                    var permittedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif" };
-                    var ext = Path.GetExtension(file.FileName).ToLowerInvariant();
-                    if (!permittedExtensions.Contains(ext))
+                    string rezult;
+                    rezult = await SaveFileModel.SaveFile(_appEnvironment.ContentRootPath, "Clubs", club.Title,file);
+                    if (rezult != "Изображение успешно сохранено") 
                     {
-                        return BadRequest("Файл не является изображением");
-                    }
-
-                    // Проверка типа содержимого
-                    var permittedContentTypes = new[] { "image/jpeg", "image/png", "image/gif" };
-                    if (!permittedContentTypes.Contains(file.ContentType))
-                    {
-                        return BadRequest("Файл не является изображением");
-                    }
-                    //// путь к папке Files
-                    string folderPath = Path.Combine(_appEnvironment.ContentRootPath, "MyStaticFiles\\Clubs", club.Title);
-                    string filePath = Path.Combine(folderPath, file.FileName);
-                    //// Создание папки, если она не существует
-                    if (!Directory.Exists(folderPath))
-                    {
-                        Directory.CreateDirectory(folderPath);
-                    }
-
-                    // Удаление старого изображения, если оно существует
-                    if (club.ClubImage != null)
-                    {
-                        string oldImagePath = _appEnvironment.ContentRootPath + club.ClubImage.Path;
-                        if (System.IO.File.Exists(oldImagePath))
-                        {
-                            System.IO.File.Delete(oldImagePath);
-                        }
-                        _db.Images.Remove(club.ClubImage);
+                        return BadRequest(rezult);
                     }                    
-                    // сохраняем файл в папку Files в каталоге wwwroot
-                    using (var fileStream = new FileStream(filePath, FileMode.Create))
-                    {
-                        await file.CopyToAsync(fileStream);
-                    }
+
                     // Формируем URL для изображения
                     string imageUrl = Url.Content("~/StaticFiles/Clubs/" + club.Title + "/" + file.FileName);
                     Image image = new Image { ImageName = file.FileName, Path = imageUrl };
@@ -98,7 +67,7 @@ namespace InterestClubWebAPI.Controllers
                     _db.Images.Add(image);
                     _db.SaveChanges();
 
-                    return Ok(new { message = "Изображение успешно добавлено", imageUrl });
+                    //return Ok(new { message = "Изображение успешно добавлено", imageUrl });
                 }
                 catch (Exception ex)
                 {
@@ -185,7 +154,7 @@ namespace InterestClubWebAPI.Controllers
 
         [Authorize]
         [HttpPost("EditClub")]
-        public IActionResult EditUser(string clubId,string title, string description, string fullDescription)
+        public async Task<IActionResult> EditUser(string clubId,string title, string description, string fullDescription, IFormFile? file)
         {
             var token = HttpContext.GetTokenAsync("access_token");
             var userCreditans = _authentication.getUserCreditansFromJWT(token.Result);
@@ -194,7 +163,7 @@ namespace InterestClubWebAPI.Controllers
             {
                 return BadRequest("Нет такого пользователя от которого идет запрос :(");
             }
-            Club? club = _db.Clubs.FirstOrDefault(c => c.Id.ToString()== clubId);
+            Club? club = _db.Clubs.Include(c => c.ClubImage).FirstOrDefault(c => c.Id.ToString()== clubId);
             if(club == null)
             {
                 return BadRequest("Нет такого клуба :(");
@@ -204,6 +173,26 @@ namespace InterestClubWebAPI.Controllers
                 club.Title = title;
                 club.Description = description;
                 club.FullDescription = fullDescription;
+
+                if (file != null) 
+                {
+                    // Удаление старого изображения, если оно существует
+                    if (club.ClubImage != null)
+                    {
+                        string oldImagePath = _appEnvironment.ContentRootPath + club.ClubImage.Path;
+                        if (System.IO.File.Exists(oldImagePath))
+                        {
+                            System.IO.File.Delete(oldImagePath);
+                        }
+                        _db.Images.Remove(club.ClubImage);
+                    }
+                    string rezult;
+                    rezult = await SaveFileModel.SaveFile(_appEnvironment.ContentRootPath, "Clubs", club.Title, file);
+                    if (rezult != "Изображение успешно сохранено")
+                    {
+                        return BadRequest(rezult);
+                    }
+                }
                 _db.SaveChanges();                
                 return Ok("Клуб успешно изменен");
             }

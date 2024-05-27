@@ -71,7 +71,7 @@ namespace InterestClubWebAPI.Extensions
                 ClubID = ev.ClubID,
                 EventDate = ev.EventDate,
                 MembersCount = ev.Members.Count(),
-                ImagePath = ev.EventImage != null ? ev.EventImage.Path : null,                
+                ImagePath = ev.EventImage?.Path,                
                 //Members = ev.Members.Select(m => m.ToDTO()).ToList(),
                 
             };

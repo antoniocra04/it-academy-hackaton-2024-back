@@ -57,44 +57,13 @@ namespace InterestClubWebAPI.Controllers
             {
                 try
                 {
-                    // Проверка, является ли файл изображением
-                    var permittedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif" };
-                    var ext = Path.GetExtension(file.FileName).ToLowerInvariant();
-                    if (!permittedExtensions.Contains(ext))
+                    string rezult;
+                    rezult = await SaveFileModel.SaveFile(_appEnvironment.ContentRootPath, "Events", ev.Name, file);
+                    if (rezult != "Изображение успешно сохранено")
                     {
-                        return BadRequest("Файл не является изображением");
-                    }
-
-                    // Проверка типа содержимого
-                    var permittedContentTypes = new[] { "image/jpeg", "image/png", "image/gif" };
-                    if (!permittedContentTypes.Contains(file.ContentType))
-                    {
-                        return BadRequest("Файл не является изображением");
-                    }
-                    // путь к папке Files
-                    string folderPath = Path.Combine(_appEnvironment.ContentRootPath, "MyStaticFiles\\Events", ev.Name);
-                    string filePath = Path.Combine(folderPath, file.FileName);
-                    // Создание папки, если она не существует
-                    if (!Directory.Exists(folderPath))
-                    {
-                        Directory.CreateDirectory(folderPath);
-                    }
-
-                    // Удаление старого изображения, если оно существует
-                    if (club.ClubImage != null)
-                    {
-                        string oldImagePath = _appEnvironment.ContentRootPath + ev.EventImage.Path;
-                        if (System.IO.File.Exists(oldImagePath))
-                        {
-                            System.IO.File.Delete(oldImagePath);
-                        }
-                        _db.Images.Remove(ev.EventImage);
-                    }
-                    // сохраняем файл в папку Files в каталоге wwwroot
-                    using (var fileStream = new FileStream(filePath, FileMode.Create))
-                    {
-                        await file.CopyToAsync(fileStream);
-                    }
+                        return BadRequest(rezult);
+                    }                   
+                    
                     string imageUrl = Url.Content("~/StaticFiles/Events/" + ev.Name + "/" + file.FileName);
                     Image image = new Image { ImageName = file.FileName, Path = imageUrl };
                     ev.EventImage = image;
@@ -102,7 +71,7 @@ namespace InterestClubWebAPI.Controllers
                     _db.SaveChanges();
 
 
-                    return Ok(new { message = "Изображение успешно добавлено", imageUrl });
+                    //return Ok(new { message = "Изображение успешно добавлено", imageUrl });
                 }
                 catch (Exception ex)
                 {
@@ -185,7 +154,7 @@ namespace InterestClubWebAPI.Controllers
         
         [Authorize]
         [HttpPost("EditEvent")]
-        public IActionResult EditUser(string eventId, string name, string description,string fullDescription)
+        public async Task<IActionResult> EditUser(string eventId, string name, string description,string fullDescription,IFormFile? file)
         {
             var token = HttpContext.GetTokenAsync("access_token");
             var userCreditans = _authentication.getUserCreditansFromJWT(token.Result);
@@ -194,7 +163,7 @@ namespace InterestClubWebAPI.Controllers
             {
                 return BadRequest("Íåò òàêîãî ïîëüçîâàòåëÿ îò êîòîðîãî èäåò çàïðîñ :(");
             }
-            Event? ev = _db.Events.FirstOrDefault(e => e.Id.ToString() == eventId);
+            Event? ev = _db.Events.Include(e => e.EventImage).FirstOrDefault(e => e.Id.ToString() == eventId);
             if (ev == null)
             {
                 return BadRequest("Íåò òàêîãî Èâåíòà :(");
@@ -205,6 +174,25 @@ namespace InterestClubWebAPI.Controllers
                 ev.Description = description;     
                 ev.FullDescription = fullDescription;
                 _db.SaveChanges();
+                if (file != null)
+                {
+                    // Удаление старого изображения, если оно существует
+                    if (ev.EventImage != null)
+                    {
+                        string oldImagePath = _appEnvironment.ContentRootPath + ev.EventImage.Path;
+                        if (System.IO.File.Exists(oldImagePath))
+                        {
+                            System.IO.File.Delete(oldImagePath);
+                        }
+                        _db.Images.Remove(ev.EventImage);
+                    }
+                    string rezult;
+                    rezult = await SaveFileModel.SaveFile(_appEnvironment.ContentRootPath, "Events", ev.Name, file);
+                    if (rezult != "Изображение успешно сохранено")
+                    {
+                        return BadRequest(rezult);
+                    }
+                }
                 return Ok("Êëóá óñïåøíî èçìåíåí");
             }
             else
