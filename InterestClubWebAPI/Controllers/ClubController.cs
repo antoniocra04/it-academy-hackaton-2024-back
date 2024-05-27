@@ -84,8 +84,7 @@ namespace InterestClubWebAPI.Controllers
                             System.IO.File.Delete(oldImagePath);
                         }
                         _db.Images.Remove(club.ClubImage);
-                    }
-                    //string filePath = Path.Combine(folderPath, file.FileName);
+                    }                    
                     // сохраняем файл в папку Files в каталоге wwwroot
                     using (var fileStream = new FileStream(filePath, FileMode.Create))
                     {
@@ -159,7 +158,7 @@ namespace InterestClubWebAPI.Controllers
         [HttpGet("GetAllClubs")]
         public IActionResult GetAllClubs()
         {
-            var clubs = _db.Clubs.Include(c => c.Users).Include(c => c.Events).Include(c => c.Discussions).ToList();
+            var clubs = _db.Clubs.Include(c => c.Users).Include(c => c.Events).Include(c => c.Discussions).Include(c => c.ClubImage).ToList();
 
             if (clubs.Any())
             {

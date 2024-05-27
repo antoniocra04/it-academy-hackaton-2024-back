@@ -19,7 +19,7 @@ namespace InterestClubWebAPI.Extensions
                 FullDescription = club.FullDescription,
                 CreatorClubID = club.CreatorClubID,
                 CountMembers = club.Users.Count(),
-                ImagePath = club.ClubImage != null ? club.ClubImage.Path : null,
+                ImagePath = club.ClubImage?.Path,
                 //Users = club.Users.Select(u => u.ToDTO()).ToList(),
                 Events = club.Events.Select(e => e.ToDTO()).ToList(),        
                 Discussions = club.Discussions.Select(d => d.ToDTO()).ToList(),
