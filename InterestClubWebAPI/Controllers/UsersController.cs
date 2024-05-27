@@ -255,6 +255,12 @@ namespace InterestClubWebAPI.Controllers
             {
                 return BadRequest("Нет клуба с таким ID");
             }
+            //if (club.CreatorClubID == user.Id )
+            //{
+            //    _db.Clubs.Remove(club);
+            //    _db.SaveChanges();
+            //    return Ok("Вы вышли из клуба и тем самым удалили его ");
+            //}
             club.Users.Remove(user);
             _db.SaveChanges();
             return Ok(clubId);
