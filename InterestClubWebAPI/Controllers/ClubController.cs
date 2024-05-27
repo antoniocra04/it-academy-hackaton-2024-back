@@ -30,7 +30,7 @@ namespace InterestClubWebAPI.Controllers
         }
         [Authorize]
         [HttpPost("CreateClub")]
-        public async Task<IActionResult> CreateClub(string title, string description, string fullDescription, string userId)
+        public async Task<IActionResult> CreateClub(string title, string description, string fullDescription, string userId, IFormFile file)
         {
             User? user = _db.Users.FirstOrDefault(u => u.Id.ToString() == userId);
 
@@ -75,13 +75,13 @@ namespace InterestClubWebAPI.Controllers
                             return BadRequest("Файл не является изображением");
                         }
                         //// путь к папке Files
-                        //string folderPath = Path.Combine(_appEnvironment.WebRootPath, "Files", club.Title);
-                        //string filePath = Path.Combine(folderPath, uploadedFile.FileName);
+                        string folderPath = Path.Combine(_appEnvironment.ContentRootPath, "Files", club.Title);
+                        string filePath = Path.Combine(folderPath, uploadedFile.FileName);
                         //// Создание папки, если она не существует
-                        //if (!Directory.Exists(folderPath))
-                        //{
-                        //    Directory.CreateDirectory(folderPath);
-                        //}
+                        if (!Directory.Exists(folderPath))
+                        {
+                            Directory.CreateDirectory(folderPath);
+                        }
 
                         // Удаление старого изображения, если оно существует
                         if (club.ClubImage != null)
@@ -96,7 +96,7 @@ namespace InterestClubWebAPI.Controllers
                         // путь к папке Files
                         string path = $"/Images/{club.Title}/" + uploadedFile.FileName;
                         // сохраняем файл в папку Files в каталоге wwwroot
-                        using (var fileStream = new FileStream(_appEnvironment.ContentRootPath + path, FileMode.Create))
+                        using (var fileStream = new FileStream(folderPath, FileMode.Create))
                         {
                             await uploadedFile.CopyToAsync(fileStream);
                         }
