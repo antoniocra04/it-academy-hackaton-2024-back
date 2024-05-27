@@ -7,6 +7,7 @@ using InterestClubWebAPI.Extensions;
 using InterestClubWebAPI.Models.DTOs;
 using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Authentication;
+using System.Data.Entity;
 
 namespace InterestClubWebAPI.Controllers
 {
@@ -25,11 +26,17 @@ namespace InterestClubWebAPI.Controllers
         [HttpPost("CreateDiscussion")]
         public IActionResult CreateDiscussion(string clubId, string title, string description, string fullDescription)
         {
+            Club? club = _db.Clubs.Include(c => c.Discussions).FirstOrDefault(c => c.Id.ToString() == clubId);
+            if (club == null)
+            {
+                return BadRequest("Нет такого клуба");
+            }
             if (_db.Discussions.Any(d => d.Title == title && d.ClubId.ToString() == clubId))
             {
                 return BadRequest("Обсуждение с таким название уже созданно у этого клуба");
-            }
+            }            
             Discussion discussion = new Discussion { ClubId = Guid.Parse(clubId), Title = title, Description = description, FullDescription = fullDescription };
+            club.Discussions.Add(discussion);
             _db.Discussions.Add(discussion);
             _db.SaveChanges();
             return Ok(discussion.ToDTO());
