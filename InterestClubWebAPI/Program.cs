@@ -82,6 +82,9 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseDefaultFiles();
+app.UseStaticFiles();
+app.UseDirectoryBrowser();
 
 app.UseFileServer(new FileServerOptions
 {

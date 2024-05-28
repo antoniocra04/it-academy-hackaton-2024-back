@@ -59,6 +59,9 @@
     <None Update="MyStaticFiles\app\MyStaticFiles\Clubs\Снег\IMG_0594.jpg">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="MyStaticFiles\app\MyStaticFiles\Обои_БЛ%282%29.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="MyStaticFiles\Clubs\asdfasf\IMG_0481.jpg">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
@@ -75,6 +78,36 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="MyStaticFiles\Clubs\Снег\IMG_0594.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="MyStaticFiles\Events\asdfasdfasdf\IMG_0507.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="MyStaticFiles\Events\fffffffff\IMG_0480-3.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="MyStaticFiles\Events\Проходим Рут На Лену\Лена_БЛ%282%29.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="MyStaticFiles\Events\Сходка бобролюбов\cdn2.tu-tu.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="MyStaticFiles\Events\Сходка Фанатов 002\Darling In The Franxx %281%29.jpeg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="MyStaticFiles\Events\Сходка Фанатов One Punch Man\One Punch Man.jpeg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="MyStaticFiles\Events\Сходка Фанатов Лены из БЛ\Лена_БЛ.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="MyStaticFiles\Events\Сходка Фанатов Макимы\Chainsaw Man %287%29.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="MyStaticFiles\Events\Сходка Фанатов Пауэр\Chainsaw Man.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="MyStaticFiles\Events\Треннировка\1541744864_gymex3.jpg">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>
