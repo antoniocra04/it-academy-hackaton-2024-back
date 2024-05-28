@@ -86,7 +86,7 @@ app.UseHttpsRedirection();
 app.UseFileServer(new FileServerOptions
 {
     FileProvider = new PhysicalFileProvider(
-           Path.Combine(builder.Environment.ContentRootPath, "MyStaticFiles")),
+           Path.Combine(builder.Environment.ContentRootPath, "MyStaticFiles/")),
     RequestPath = "/StaticFiles",
     EnableDirectoryBrowsing = true
 });

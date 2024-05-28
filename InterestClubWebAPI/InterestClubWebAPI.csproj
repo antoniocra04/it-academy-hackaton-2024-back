@@ -41,6 +41,24 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="MyStaticFiles\app\MyStaticFiles\Clubs\asdfasf\IMG_0481.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="MyStaticFiles\app\MyStaticFiles\Clubs\Бесконечное Лето\Обои_БЛ%282%29.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="MyStaticFiles\app\MyStaticFiles\Clubs\Бобр, я пердоле\og_og_1661511544254191887.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="MyStaticFiles\app\MyStaticFiles\Clubs\Качалка\afccfaa1007a81f8f836f0db942fd0cb.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="MyStaticFiles\app\MyStaticFiles\Clubs\Лучшая Вайфу\AvaGitHub.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="MyStaticFiles\app\MyStaticFiles\Clubs\Снег\IMG_0594.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="MyStaticFiles\Clubs\asdfasf\IMG_0481.jpg">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
