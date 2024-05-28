@@ -99,7 +99,7 @@ namespace InterestClubWebAPI.Controllers
                 if (club != null)
                 {
                     // Путь к папке клуба
-                    string clubDirectoryPath = Path.Combine(_appEnvironment.ContentRootPath, "MyStaticFiles\\Clubs", club.Title);
+                    string clubDirectoryPath = Path.Combine(_appEnvironment.ContentRootPath, "MyStaticFiles/Clubs", club.Title);
 
                     // Проверка, существует ли папка
                     if (Directory.Exists(clubDirectoryPath))
