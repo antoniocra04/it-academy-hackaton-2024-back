@@ -61,17 +61,20 @@ namespace InterestClubWebAPI.Services
             //    .WithContentType(file.ContentType);
             //}
 
+            var objectPath = $"{contextPath}/{file.FileName}";
+
             // Upload a file to bucket.
             var putObjectArgs = new PutObjectArgs()
                 .WithBucket(ImageBucket)
-                .WithObject(Path.Combine(ImageBucket, contextPath, file.FileName))
+                .WithObjectSize(file.Length)
+                .WithObject(objectPath)
                 .WithStreamData(file.OpenReadStream())
                 .WithContentType(file.ContentType);
 
             await Client.PutObjectAsync(putObjectArgs).ConfigureAwait(false);
             Console.WriteLine("Successfully uploaded " + file.FileName);
 
-            return Path.Combine(ServerIP, ImageBucket, contextPath, file.FileName);
+            return $"{ServerIP}/{ImageBucket}/{contextPath}/{file.FileName}";
         }
 
         public async static void RemoveFile(string fileURL)
