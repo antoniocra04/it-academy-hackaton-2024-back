@@ -10,6 +10,7 @@ using InterestClubWebAPI.Repository;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Authentication;
 using System.Linq;
+using InterestClubWebAPI.Services;
 //using System.Data.Entity;
 
 
@@ -59,14 +60,13 @@ namespace InterestClubWebAPI.Controllers
                 {
                     try
                     {
-                        string rezult;
-                        rezult = await SaveFileModel.SaveFile(_appEnvironment.ContentRootPath, "Events", ev.Name, file);
-                        if (rezult != "Изображение успешно сохранено")
+                        var result = MinIOManager.UploadFile(file, ev.Name).Result;
+                        if (result == string.Empty)
                         {
-                            return BadRequest(rezult);
+                            return BadRequest(result);
                         }
 
-                        string imageUrl = Url.Content("~/StaticFiles/Events/" + ev.Name + "/" + file.FileName);
+                        string imageUrl = result;
                         Image image = new Image { ImageName = file.FileName, Path = imageUrl };
                         ev.EventImage = image;
                         _db.Images.Add(image);
