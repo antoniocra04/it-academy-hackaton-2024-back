@@ -77,16 +77,16 @@ namespace InterestClubWebAPI.Services
             return $"http://{ServerIP}/{ImageBucket}/{contextPath}/{file.FileName}";
         }
 
-        public async static void RemoveFile(string fileURL)
+        public async static void RemoveFile(string contextPath)
         {
-            if (Client is null)
+            if (Client == null)
             {
-                throw new Exception("Client did connected.");
+                throw new Exception("MinIO Client не подключен");
             }
 
             var args = new RemoveObjectArgs()
                 .WithBucket(ImageBucket)
-                .WithObject(fileURL);
+                .WithObject(contextPath);
 
             await Client.RemoveObjectAsync(args).ConfigureAwait(false);
         }

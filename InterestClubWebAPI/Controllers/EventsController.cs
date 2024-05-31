@@ -102,7 +102,10 @@ namespace InterestClubWebAPI.Controllers
                 }
                 else
                 {
-                    MinIOManager.RemoveFile(ev.EventImage?.Path);
+                    if (ev.EventImage != null)
+                    {
+                        MinIOManager.RemoveFile($"{ev.Name}/{ev.EventImage.ImageName}");
+                    }
 
                     _db.Events.Remove(ev);
 
@@ -194,7 +197,7 @@ namespace InterestClubWebAPI.Controllers
                 {
                     if (ev.EventImage != null)
                     {
-                        MinIOManager.RemoveFile(ev.EventImage.Path);
+                        MinIOManager.RemoveFile($"{ev.Name}/{ev.EventImage.ImageName}");
                         _db.Images.Remove(ev.EventImage);
                     }
 

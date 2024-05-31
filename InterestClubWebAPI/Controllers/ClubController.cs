@@ -95,11 +95,14 @@ namespace InterestClubWebAPI.Controllers
         {
             try
             {
-                Club? club = _db.Clubs.FirstOrDefault(club => club.Id.ToString() == id);
+                Club? club = _db.Clubs.Include(c => c.ClubImage).FirstOrDefault(club => club.Id.ToString() == id);
 
                 if (club != null)
                 {
-                    MinIOManager.RemoveFile(club.ClubImage?.Path);
+                    if (club.ClubImage != null)
+                    {
+                        MinIOManager.RemoveFile($"{club.Title}/{club.ClubImage.ImageName}");
+                    }
 
                     // Удаление записи клуба из базы данных
                     _db.Clubs.Remove(club);
@@ -196,7 +199,7 @@ namespace InterestClubWebAPI.Controllers
                 {
                     if (club.ClubImage != null)
                     {
-                        MinIOManager.RemoveFile(club.ClubImage.Path);
+                        MinIOManager.RemoveFile($"{club.Title}/{club.ClubImage.ImageName}");
                         _db.Images.Remove(club.ClubImage);
                     }
 
