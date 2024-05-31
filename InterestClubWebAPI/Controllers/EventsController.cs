@@ -102,15 +102,7 @@ namespace InterestClubWebAPI.Controllers
                 }
                 else
                 {
-                    // Ïóòü ê ïàïêå êëóáà
-                    string eventDirectoryPath = Path.Combine(_appEnvironment.ContentRootPath, "MyStaticFiles\\Events", ev.Name);
-
-                    // Ïðîâåðêà, ñóùåñòâóåò ëè ïàïêà
-                    if (Directory.Exists(eventDirectoryPath))
-                    {
-                        // Óäàëåíèå ïàïêè è åå ñîäåðæèìîãî
-                        Directory.Delete(eventDirectoryPath, true);
-                    }
+                    MinIOManager.RemoveFile(ev.EventImage?.Path);
 
                     _db.Events.Remove(ev);
 
@@ -200,32 +192,21 @@ namespace InterestClubWebAPI.Controllers
                 }
                 if (ev.CreatorEventID == user.Id || user.Role == Enums.Role.admin)
                 {
-                    if (file != null)
+                    if (ev.EventImage != null)
                     {
-                        // Удаление старого изображения, если оно существует
-                        if (ev.EventImage != null)
-                        {
-                            // Путь к папке клуба
-                            string oldImagePath = Path.Combine(_appEnvironment.ContentRootPath, "MyStaticFiles\\Events", ev.Name);
-
-                            // Проверка, существует ли папка
-                            if (Directory.Exists(oldImagePath))
-                            {
-                                // Удаление папки и ее содержимого
-                                Directory.Delete(oldImagePath, true);
-                            }
-                            _db.Images.Remove(ev.EventImage);
-                        }
-                        ev.Name = name;
-                        string rezult;
-                        rezult = await SaveFileModel.SaveFile(_appEnvironment.ContentRootPath, "Events", ev.Name, file);
-                        if (rezult != "Изображение успешно сохранено")
-                        {
-                            return BadRequest(rezult);
-                        }
+                        MinIOManager.RemoveFile(ev.EventImage.Path);
+                        _db.Images.Remove(ev.EventImage);
                     }
-                    string imageUrl = Url.Content("~/StaticFiles/Events/" + ev.Name + "/" + file.FileName);
+
+                    var result = MinIOManager.UploadFile(file, ev.Name).Result;
+                    if (result == string.Empty)
+                    {
+                        return BadRequest(result);
+                    }
+
+                    string imageUrl = result;
                     Image image = new Image { ImageName = file.FileName, Path = imageUrl };
+
                     ev.Name = name;
                     ev.Description = description;
                     ev.FullDescription = fullDescription;

@@ -99,15 +99,7 @@ namespace InterestClubWebAPI.Controllers
 
                 if (club != null)
                 {
-                    //// Путь к папке клуба
-                    //string clubDirectoryPath = Path.Combine(_appEnvironment.ContentRootPath, "MyStaticFiles/Clubs", club.Title);
-
-                    //// Проверка, существует ли папка
-                    //if (Directory.Exists(clubDirectoryPath))
-                    //{
-                    //    // Удаление папки и ее содержимого
-                    //    Directory.Delete(clubDirectoryPath, true);
-                    //}
+                    MinIOManager.RemoveFile(club.ClubImage?.Path);
 
                     // Удаление записи клуба из базы данных
                     _db.Clubs.Remove(club);
@@ -202,6 +194,12 @@ namespace InterestClubWebAPI.Controllers
                 }
                 if (club.CreatorClubID == user.Id || user.Role == Enums.Role.admin)
                 {
+                    if (club.ClubImage != null)
+                    {
+                        MinIOManager.RemoveFile(club.ClubImage.Path);
+                        _db.Images.Remove(club.ClubImage);
+                    }
+
                     var result = MinIOManager.UploadFile(file, club.Title).Result;
                     if (result == string.Empty)
                     {
