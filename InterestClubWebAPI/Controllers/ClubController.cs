@@ -197,27 +197,33 @@ namespace InterestClubWebAPI.Controllers
                 }
                 if (club.CreatorClubID == user.Id || user.Role == Enums.Role.admin)
                 {
-                    if (club.ClubImage != null)
+                    if (file != null)
                     {
-                        MinIOManager.RemoveFile($"{club.Title}/{club.ClubImage.ImageName}");
-                        _db.Images.Remove(club.ClubImage);
-                    }
+                        if (club.ClubImage != null)
+                        {
+                            MinIOManager.RemoveFile($"{club.Title}/{club.ClubImage.ImageName}");
+                            _db.Images.Remove(club.ClubImage);
+                        }
 
-                    var result = MinIOManager.UploadFile(file, club.Title).Result;
-                    if (result == string.Empty)
-                    {
-                        return BadRequest("Ошибка при загрузке изображения");
-                    }
+                        var result = MinIOManager.UploadFile(file, club.Title).Result;
+                        if (result == string.Empty)
+                        {
+                            return BadRequest("Ошибка при загрузке изображения");
+                        }
 
-                    // Формируем URL для изображения
-                    string imageUrl = result;
-                    Image image = new Image { ImageName = file.FileName, Path = imageUrl };
+
+                        // Формируем URL для изображения
+                        string imageUrl = result;
+                        Image image = new Image { ImageName = file.FileName, Path = imageUrl };
+
+                        club.ClubImage = image;
+                        _db.Images.Add(image);
+                    }                   
 
                     club.Title = title;
                     club.Description = description;
                     club.FullDescription = fullDescription;
-                    club.ClubImage = image;
-                    _db.Images.Add(image);
+                    
                     _db.SaveChanges();
                     return Ok("Клуб успешно изменен");
                 }

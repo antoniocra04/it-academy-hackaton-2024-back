@@ -195,26 +195,31 @@ namespace InterestClubWebAPI.Controllers
                 }
                 if (ev.CreatorEventID == user.Id || user.Role == Enums.Role.admin)
                 {
-                    if (ev.EventImage != null)
+                    if (file != null)
                     {
-                        MinIOManager.RemoveFile($"{ev.Name}/{ev.EventImage.ImageName}");
-                        _db.Images.Remove(ev.EventImage);
-                    }
+                        if (ev.EventImage != null)
+                        {
+                            MinIOManager.RemoveFile($"{ev.Name}/{ev.EventImage.ImageName}");
+                            _db.Images.Remove(ev.EventImage);
+                        }
 
-                    var result = MinIOManager.UploadFile(file, ev.Name).Result;
-                    if (result == string.Empty)
-                    {
-                        return BadRequest(result);
-                    }
+                        var result = MinIOManager.UploadFile(file, ev.Name).Result;
+                        if (result == string.Empty)
+                        {
+                            return BadRequest(result);
+                        }
 
-                    string imageUrl = result;
-                    Image image = new Image { ImageName = file.FileName, Path = imageUrl };
+                        string imageUrl = result;
+                        Image image = new Image { ImageName = file.FileName, Path = imageUrl };
+
+                        ev.EventImage = image;
+                        _db.Images.Add(image);
+                    }
 
                     ev.Name = name;
                     ev.Description = description;
                     ev.FullDescription = fullDescription;
-                    ev.EventImage = image;
-                    _db.Images.Add(image);
+                    
                     _db.SaveChanges();
                     return Ok("Êëóá óñïåøíî èçìåíåí");
                 }
