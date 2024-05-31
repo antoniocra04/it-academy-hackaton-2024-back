@@ -74,7 +74,7 @@ namespace InterestClubWebAPI.Services
             await Client.PutObjectAsync(putObjectArgs).ConfigureAwait(false);
             Console.WriteLine("Successfully uploaded " + file.FileName);
 
-            return $"{ServerIP}/{ImageBucket}/{contextPath}/{file.FileName}";
+            return $"http://{ServerIP}/{ImageBucket}/{contextPath}/{file.FileName}";
         }
 
         public async static void RemoveFile(string fileURL)

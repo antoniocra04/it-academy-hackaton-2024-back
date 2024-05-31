@@ -202,34 +202,16 @@ namespace InterestClubWebAPI.Controllers
                 }
                 if (club.CreatorClubID == user.Id || user.Role == Enums.Role.admin)
                 {
-
-
-                    if (file != null)
+                    var result = MinIOManager.UploadFile(file, club.Title).Result;
+                    if (result == string.Empty)
                     {
-                        // Удаление старого изображения, если оно существует
-                        if (club.ClubImage != null)
-                        {
-                            // Путь к папке клуба
-                            string oldImagePath = Path.Combine(_appEnvironment.ContentRootPath, "MyStaticFiles\\Clubs", club.Title);
-
-                            // Проверка, существует ли папка
-                            if (Directory.Exists(oldImagePath))
-                            {
-                                // Удаление папки и ее содержимого
-                                Directory.Delete(oldImagePath, true);
-                            }
-                            _db.Images.Remove(club.ClubImage);
-                        }
-                        club.Title = title;
-                        string rezult;
-                        rezult = await SaveFileModel.SaveFile(_appEnvironment.ContentRootPath, "Clubs", club.Title, file);
-                        if (rezult != "Изображение успешно сохранено")
-                        {
-                            return BadRequest(rezult);
-                        }
+                        return BadRequest("Ошибка при загрузке изображения");
                     }
-                    string imageUrl = Url.Content("~/StaticFiles/Clubs/" + club.Title + "/" + file.FileName);
+
+                    // Формируем URL для изображения
+                    string imageUrl = result;
                     Image image = new Image { ImageName = file.FileName, Path = imageUrl };
+
                     club.Title = title;
                     club.Description = description;
                     club.FullDescription = fullDescription;
