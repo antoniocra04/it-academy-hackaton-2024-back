@@ -10,6 +10,7 @@ using InterestClubWebAPI.Repository;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Authentication;
 using System.Linq;
+using InterestClubWebAPI.Services;
 //using System.Data.Entity;
 
 
@@ -59,14 +60,13 @@ namespace InterestClubWebAPI.Controllers
                 {
                     try
                     {
-                        string rezult;
-                        rezult = await SaveFileModel.SaveFile(_appEnvironment.ContentRootPath, "Events", ev.Name, file);
-                        if (rezult != "Изображение успешно сохранено")
+                        var result = MinIOManager.UploadFile(file, ev.Name).Result;
+                        if (result == string.Empty)
                         {
-                            return BadRequest(rezult);
+                            return BadRequest(result);
                         }
 
-                        string imageUrl = Url.Content("~/StaticFiles/Events/" + ev.Name + "/" + file.FileName);
+                        string imageUrl = result;
                         Image image = new Image { ImageName = file.FileName, Path = imageUrl };
                         ev.EventImage = image;
                         _db.Images.Add(image);
@@ -102,14 +102,9 @@ namespace InterestClubWebAPI.Controllers
                 }
                 else
                 {
-                    // Ïóòü ê ïàïêå êëóáà
-                    string eventDirectoryPath = Path.Combine(_appEnvironment.ContentRootPath, "MyStaticFiles\\Events", ev.Name);
-
-                    // Ïðîâåðêà, ñóùåñòâóåò ëè ïàïêà
-                    if (Directory.Exists(eventDirectoryPath))
+                    if (ev.EventImage != null)
                     {
-                        // Óäàëåíèå ïàïêè è åå ñîäåðæèìîãî
-                        Directory.Delete(eventDirectoryPath, true);
+                        MinIOManager.RemoveFile($"{ev.Name}/{ev.EventImage.ImageName}");
                     }
 
                     _db.Events.Remove(ev);
@@ -202,35 +197,29 @@ namespace InterestClubWebAPI.Controllers
                 {
                     if (file != null)
                     {
-                        // Удаление старого изображения, если оно существует
                         if (ev.EventImage != null)
                         {
-                            // Путь к папке клуба
-                            string oldImagePath = Path.Combine(_appEnvironment.ContentRootPath, "MyStaticFiles\\Events", ev.Name);
-
-                            // Проверка, существует ли папка
-                            if (Directory.Exists(oldImagePath))
-                            {
-                                // Удаление папки и ее содержимого
-                                Directory.Delete(oldImagePath, true);
-                            }
+                            MinIOManager.RemoveFile($"{ev.Name}/{ev.EventImage.ImageName}");
                             _db.Images.Remove(ev.EventImage);
                         }
-                        ev.Name = name;
-                        string rezult;
-                        rezult = await SaveFileModel.SaveFile(_appEnvironment.ContentRootPath, "Events", ev.Name, file);
-                        if (rezult != "Изображение успешно сохранено")
+
+                        var result = MinIOManager.UploadFile(file, ev.Name).Result;
+                        if (result == string.Empty)
                         {
-                            return BadRequest(rezult);
+                            return BadRequest(result);
                         }
+
+                        string imageUrl = result;
+                        Image image = new Image { ImageName = file.FileName, Path = imageUrl };
+
+                        ev.EventImage = image;
+                        _db.Images.Add(image);
                     }
-                    string imageUrl = Url.Content("~/StaticFiles/Events/" + ev.Name + "/" + file.FileName);
-                    Image image = new Image { ImageName = file.FileName, Path = imageUrl };
+
                     ev.Name = name;
                     ev.Description = description;
                     ev.FullDescription = fullDescription;
-                    ev.EventImage = image;
-                    _db.Images.Add(image);
+                    
                     _db.SaveChanges();
                     return Ok("Êëóá óñïåøíî èçìåíåí");
                 }

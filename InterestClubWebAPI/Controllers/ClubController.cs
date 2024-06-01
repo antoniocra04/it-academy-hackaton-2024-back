@@ -13,6 +13,8 @@ using System.Xml.Linq;
 using System.IO;
 using System.Threading;
 using Microsoft.AspNetCore.Hosting.Server;
+using InterestClubWebAPI.Services;
+using Microsoft.AspNetCore.Mvc.Routing;
 
 namespace InterestClubWebAPI.Controllers
 {
@@ -55,15 +57,14 @@ namespace InterestClubWebAPI.Controllers
                 {
                     try
                     {
-                        string rezult;
-                        rezult = await SaveFileModel.SaveFile(_appEnvironment.ContentRootPath, "Clubs", club.Title, file);
-                        if (rezult != "Изображение успешно сохранено")
+                        var result = MinIOManager.UploadFile(file, club.Title).Result;
+                        if (result == string.Empty)
                         {
-                            return BadRequest(rezult);
+                            return BadRequest("Ошибка при загрузке изображения");
                         }
 
                         // Формируем URL для изображения
-                        string imageUrl = Url.Content("~/StaticFiles/Clubs/" + club.Title + "/" + file.FileName);
+                        string imageUrl = result;
                         Image image = new Image { ImageName = file.FileName, Path = imageUrl };
                         club.ClubImage = image;
                         _db.Images.Add(image);
@@ -94,18 +95,13 @@ namespace InterestClubWebAPI.Controllers
         {
             try
             {
-                Club? club = _db.Clubs.FirstOrDefault(club => club.Id.ToString() == id);
+                Club? club = _db.Clubs.Include(c => c.ClubImage).FirstOrDefault(club => club.Id.ToString() == id);
 
                 if (club != null)
                 {
-                    // Путь к папке клуба
-                    string clubDirectoryPath = Path.Combine(_appEnvironment.ContentRootPath, "MyStaticFiles/Clubs", club.Title);
-
-                    // Проверка, существует ли папка
-                    if (Directory.Exists(clubDirectoryPath))
+                    if (club.ClubImage != null)
                     {
-                        // Удаление папки и ее содержимого
-                        Directory.Delete(clubDirectoryPath, true);
+                        MinIOManager.RemoveFile($"{club.Title}/{club.ClubImage.ImageName}");
                     }
 
                     // Удаление записи клуба из базы данных
@@ -201,39 +197,33 @@ namespace InterestClubWebAPI.Controllers
                 }
                 if (club.CreatorClubID == user.Id || user.Role == Enums.Role.admin)
                 {
-
-
                     if (file != null)
                     {
-                        // Удаление старого изображения, если оно существует
                         if (club.ClubImage != null)
                         {
-                            // Путь к папке клуба
-                            string oldImagePath = Path.Combine(_appEnvironment.ContentRootPath, "MyStaticFiles\\Clubs", club.Title);
-
-                            // Проверка, существует ли папка
-                            if (Directory.Exists(oldImagePath))
-                            {
-                                // Удаление папки и ее содержимого
-                                Directory.Delete(oldImagePath, true);
-                            }
+                            MinIOManager.RemoveFile($"{club.Title}/{club.ClubImage.ImageName}");
                             _db.Images.Remove(club.ClubImage);
                         }
-                        club.Title = title;
-                        string rezult;
-                        rezult = await SaveFileModel.SaveFile(_appEnvironment.ContentRootPath, "Clubs", club.Title, file);
-                        if (rezult != "Изображение успешно сохранено")
+
+                        var result = MinIOManager.UploadFile(file, club.Title).Result;
+                        if (result == string.Empty)
                         {
-                            return BadRequest(rezult);
+                            return BadRequest("Ошибка при загрузке изображения");
                         }
-                    }
-                    string imageUrl = Url.Content("~/StaticFiles/Clubs/" + club.Title + "/" + file.FileName);
-                    Image image = new Image { ImageName = file.FileName, Path = imageUrl };
+
+
+                        // Формируем URL для изображения
+                        string imageUrl = result;
+                        Image image = new Image { ImageName = file.FileName, Path = imageUrl };
+
+                        club.ClubImage = image;
+                        _db.Images.Add(image);
+                    }                   
+
                     club.Title = title;
                     club.Description = description;
                     club.FullDescription = fullDescription;
-                    club.ClubImage = image;
-                    _db.Images.Add(image);
+                    
                     _db.SaveChanges();
                     return Ok("Клуб успешно изменен");
                 }
